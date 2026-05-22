@@ -1,6 +1,24 @@
 package tools
 
-import "testing"
+import (
+	"context"
+	"testing"
+
+	"github.com/nextlevelbuilder/goclaw/internal/config"
+)
+
+type policyMCPTestTool struct {
+	name string
+}
+
+func (t policyMCPTestTool) Name() string        { return t.name }
+func (t policyMCPTestTool) Description() string { return "test tool" }
+func (t policyMCPTestTool) Parameters() map[string]any {
+	return map[string]any{"type": "object", "properties": map[string]any{}}
+}
+func (t policyMCPTestTool) Execute(context.Context, map[string]any) *Result {
+	return NewResult("ok")
+}
 
 func TestRegistry_RegisterToolGroup(t *testing.T) {
 	reg := NewRegistry()
@@ -39,5 +57,49 @@ func TestRegistry_RegisterToolGroup_UsedInExpand(t *testing.T) {
 	remaining := subtractSpec(reg, available, []string{"group:mcp:test"})
 	if len(remaining) != 2 {
 		t.Errorf("expected 2 remaining after subtract, got %d: %v", len(remaining), remaining)
+	}
+}
+
+func TestPolicyEngine_FilterToolsUsesActiveRegistryForMCPAlsoAllow(t *testing.T) {
+	reg := NewRegistry()
+	reg.Register(policyMCPTestTool{name: "session_status"})
+	reg.Register(policyMCPTestTool{name: "mcp_pg__query"})
+	reg.RegisterToolGroup("mcp", []string{"mcp_pg__query"})
+
+	pe := NewPolicyEngine(&config.ToolsConfig{Profile: "minimal"})
+	defs := pe.FilterTools(reg, "agent-1", "openai", &config.ToolPolicySpec{
+		AlsoAllow: []string{"group:mcp"},
+	}, nil, false, false)
+
+	got := map[string]bool{}
+	for _, def := range defs {
+		if def.Function != nil {
+			got[def.Function.Name] = true
+		}
+	}
+	if !got["session_status"] {
+		t.Fatalf("minimal profile tool missing from filtered defs: %#v", got)
+	}
+	if !got["mcp_pg__query"] {
+		t.Fatalf("MCP tool from active registry group:mcp was not also-allowed: %#v", got)
+	}
+}
+
+func TestPolicyEngine_FilterToolsUsesActiveRegistryForProfileGroups(t *testing.T) {
+	reg := NewRegistry()
+	reg.Register(policyMCPTestTool{name: "read_file"})
+	reg.Register(policyMCPTestTool{name: "exec"})
+
+	pe := NewPolicyEngine(&config.ToolsConfig{Profile: "coding"})
+	defs := pe.FilterTools(reg, "agent-1", "openai", nil, nil, false, false)
+
+	got := map[string]bool{}
+	for _, def := range defs {
+		if def.Function != nil {
+			got[def.Function.Name] = true
+		}
+	}
+	if !got["read_file"] || !got["exec"] {
+		t.Fatalf("profile group expansion should use active registry, got %#v", got)
 	}
 }

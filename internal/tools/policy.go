@@ -118,13 +118,17 @@ func (pe *PolicyEngine) FilterTools(
 	isLeafAgent bool,
 ) []providers.ToolDefinition {
 	allTools := registry.List()
-	allowed := pe.evaluate(allTools, providerName, agentToolPolicy, groupToolAllow)
+	activeRegistry := pe.registryFor(registry)
+	allowed := pe.evaluate(activeRegistry, allTools, providerName, agentToolPolicy, groupToolAllow)
 
 	// Step 8: Capability-based deny (v3 RBAC)
 	pe.mu.RLock()
 	denyCaps := pe.denyCapabilities
 	capReg := pe.registry
 	pe.mu.RUnlock()
+	if capReg == nil {
+		capReg = activeRegistry
+	}
 	if len(denyCaps) > 0 && capReg != nil {
 		allowed = filterByCapability(allowed, denyCaps, capReg)
 	}
@@ -184,8 +188,18 @@ func (pe *PolicyEngine) FilterTools(
 	return defs
 }
 
+func (pe *PolicyEngine) registryFor(registry ToolExecutor) *Registry {
+	if reg, ok := registry.(*Registry); ok {
+		return reg
+	}
+	pe.mu.RLock()
+	defer pe.mu.RUnlock()
+	return pe.registry
+}
+
 // evaluate runs the 7-step policy pipeline.
 func (pe *PolicyEngine) evaluate(
+	reg *Registry,
 	allTools []string,
 	providerName string,
 	agentToolPolicy *config.ToolPolicySpec,
@@ -193,18 +207,13 @@ func (pe *PolicyEngine) evaluate(
 ) []string {
 	g := pe.globalPolicy
 
-	// Get registry for group expansion (may be nil in early boot)
-	pe.mu.RLock()
-	reg := pe.registry
-	pe.mu.RUnlock()
-
 	// Step 1: Global profile
-	allowed := pe.applyProfile(allTools, g.Profile)
+	allowed := pe.applyProfile(reg, allTools, g.Profile)
 
 	// Step 2: Provider-level profile override
 	if g.ByProvider != nil {
 		if pp, ok := g.ByProvider[providerName]; ok && pp.Profile != "" {
-			allowed = pe.applyProfile(allTools, pp.Profile)
+			allowed = pe.applyProfile(reg, allTools, pp.Profile)
 		}
 	}
 
@@ -260,7 +269,7 @@ func (pe *PolicyEngine) evaluate(
 
 // applyProfile returns tools allowed by a named profile.
 // "full" or empty profile = all tools allowed.
-func (pe *PolicyEngine) applyProfile(allTools []string, profile string) []string {
+func (pe *PolicyEngine) applyProfile(reg *Registry, allTools []string, profile string) []string {
 	if profile == "" || profile == "full" {
 		return copySlice(allTools)
 	}
@@ -270,11 +279,6 @@ func (pe *PolicyEngine) applyProfile(allTools []string, profile string) []string
 		slog.Warn("unknown tool profile, using full", "profile", profile)
 		return copySlice(allTools)
 	}
-
-	// Get registry for group expansion
-	pe.mu.RLock()
-	reg := pe.registry
-	pe.mu.RUnlock()
 
 	return expandSpec(reg, allTools, spec)
 }
