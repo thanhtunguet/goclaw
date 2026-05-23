@@ -43,14 +43,22 @@
     "portLabel": "Cổng",
     "userLabel": "SSH User",
     "userPlaceholder": "ubuntu",
-    "identityFileLabel": "File khóa (tùy chọn)",
-    "identityFilePlaceholder": "~/.ssh/id_rsa",
-    "containerLabel": "Tên / ID container",
-    "containerPlaceholder": "my-container",
-    "dockerHostLabel": "Docker Host (tùy chọn)",
-    "dockerHostPlaceholder": "unix:///var/run/docker.sock",
+    "privateKeyLabel": "Khóa riêng (tùy chọn)",
+    "privateKeyPlaceholder": "Dán private key PEM",
+    "passwordLabel": "Mật khẩu (tùy chọn)",
+    "passwordPlaceholder": "Mật khẩu SSH",
+    "dockerImageLabel": "Docker image",
+    "dockerImagePlaceholder": "ubuntu:24.04",
+    "dockerHostLabel": "Docker Host",
+    "dockerHostPlaceholder": "tcp://127.0.0.1:2375",
     "cancel": "Hủy",
-    "create": "Tạo"
+    "create": "Tạo",
+    "errors": {
+      "sshRequired": "Host và SSH user là bắt buộc cho backend SSH.",
+      "sshAuthRequired": "Cần nhập private key hoặc mật khẩu cho backend SSH.",
+      "dockerRequired": "Docker image và Docker host là bắt buộc cho backend Docker.",
+      "createFailed": "Không thể tạo workstation."
+    }
   },
   "deleteDialog": {
     "title": "Xóa Workstation",

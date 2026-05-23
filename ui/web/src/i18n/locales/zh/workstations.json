@@ -43,14 +43,22 @@
     "portLabel": "端口",
     "userLabel": "SSH 用户",
     "userPlaceholder": "ubuntu",
-    "identityFileLabel": "密钥文件（可选）",
-    "identityFilePlaceholder": "~/.ssh/id_rsa",
-    "containerLabel": "容器名称 / ID",
-    "containerPlaceholder": "my-container",
-    "dockerHostLabel": "Docker Host（可选）",
-    "dockerHostPlaceholder": "unix:///var/run/docker.sock",
+    "privateKeyLabel": "私钥（可选）",
+    "privateKeyPlaceholder": "粘贴 PEM 私钥",
+    "passwordLabel": "密码（可选）",
+    "passwordPlaceholder": "SSH 密码",
+    "dockerImageLabel": "Docker 镜像",
+    "dockerImagePlaceholder": "ubuntu:24.04",
+    "dockerHostLabel": "Docker Host",
+    "dockerHostPlaceholder": "tcp://127.0.0.1:2375",
     "cancel": "取消",
-    "create": "创建"
+    "create": "创建",
+    "errors": {
+      "sshRequired": "SSH 后端需要填写主机和 SSH 用户。",
+      "sshAuthRequired": "SSH 后端需要填写私钥或密码。",
+      "dockerRequired": "Docker 后端需要填写 Docker 镜像和 Docker Host。",
+      "createFailed": "创建工作站失败。"
+    }
   },
   "deleteDialog": {
     "title": "删除工作站",

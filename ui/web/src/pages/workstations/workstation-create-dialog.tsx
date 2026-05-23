@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -42,9 +43,10 @@ export function WorkstationCreateDialog({
   const [host, setHost] = useState("");
   const [port, setPort] = useState("22");
   const [user, setUser] = useState("");
-  const [identityFile, setIdentityFile] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
+  const [password, setPassword] = useState("");
   // Docker fields
-  const [container, setContainer] = useState("");
+  const [dockerImage, setDockerImage] = useState("");
   const [dockerHost, setDockerHost] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -57,8 +59,9 @@ export function WorkstationCreateDialog({
     setHost("");
     setPort("22");
     setUser("");
-    setIdentityFile("");
-    setContainer("");
+    setPrivateKey("");
+    setPassword("");
+    setDockerImage("");
     setDockerHost("");
     setFieldError(null);
   }
@@ -71,34 +74,39 @@ export function WorkstationCreateDialog({
     let metadata: Record<string, unknown>;
     if (backend === "ssh") {
       if (!host.trim() || !user.trim()) {
-        setFieldError("Host and SSH user are required for SSH backend.");
+        setFieldError(t("createDialog.errors.sshRequired"));
+        return;
+      }
+      if (!privateKey.trim() && !password.trim()) {
+        setFieldError(t("createDialog.errors.sshAuthRequired"));
         return;
       }
       metadata = {
         host: host.trim(),
         port: parseInt(port, 10) || 22,
         user: user.trim(),
-        ...(identityFile.trim() ? { identity_file: identityFile.trim() } : {}),
+        ...(privateKey.trim() ? { privateKey: privateKey.trim() } : {}),
+        ...(password.trim() ? { password: password.trim() } : {}),
       };
     } else {
-      if (!container.trim()) {
-        setFieldError("Container name is required for Docker backend.");
+      if (!dockerImage.trim() || !dockerHost.trim()) {
+        setFieldError(t("createDialog.errors.dockerRequired"));
         return;
       }
       metadata = {
-        container: container.trim(),
-        ...(dockerHost.trim() ? { docker_host: dockerHost.trim() } : {}),
+        image: dockerImage.trim(),
+        host: dockerHost.trim(),
       };
     }
 
     setFieldError(null);
     setSubmitting(true);
     try {
-      await onCreate({ workstation_key: key.trim(), name: name.trim(), backend_type: backend, metadata });
+      await onCreate({ workstationKey: key.trim(), name: name.trim(), backendType: backend, metadata });
       resetForm();
       onOpenChange(false);
     } catch (err) {
-      setFieldError(err instanceof Error ? err.message : "Failed to create workstation.");
+      setFieldError(err instanceof Error ? err.message : t("createDialog.errors.createFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -106,7 +114,7 @@ export function WorkstationCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!submitting) { resetForm(); onOpenChange(v); } }}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[min(90dvh,720px)] overflow-y-auto sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t("createDialog.title")}</DialogTitle>
@@ -189,12 +197,23 @@ export function WorkstationCreateDialog({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="ws-identity">{t("createDialog.identityFileLabel")}</Label>
+                  <Label htmlFor="ws-private-key">{t("createDialog.privateKeyLabel")}</Label>
+                  <Textarea
+                    id="ws-private-key"
+                    value={privateKey}
+                    onChange={(e) => setPrivateKey(e.target.value)}
+                    placeholder={t("createDialog.privateKeyPlaceholder")}
+                    className="h-32 max-h-60 resize-y overflow-y-auto [field-sizing:fixed]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ws-password">{t("createDialog.passwordLabel")}</Label>
                   <Input
-                    id="ws-identity"
-                    value={identityFile}
-                    onChange={(e) => setIdentityFile(e.target.value)}
-                    placeholder={t("createDialog.identityFilePlaceholder")}
+                    id="ws-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t("createDialog.passwordPlaceholder")}
                     className="text-base md:text-sm"
                   />
                 </div>
@@ -204,12 +223,12 @@ export function WorkstationCreateDialog({
             {backend === "docker" && (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="ws-container">{t("createDialog.containerLabel")}</Label>
+                  <Label htmlFor="ws-docker-image">{t("createDialog.dockerImageLabel")}</Label>
                   <Input
-                    id="ws-container"
-                    value={container}
-                    onChange={(e) => setContainer(e.target.value)}
-                    placeholder={t("createDialog.containerPlaceholder")}
+                    id="ws-docker-image"
+                    value={dockerImage}
+                    onChange={(e) => setDockerImage(e.target.value)}
+                    placeholder={t("createDialog.dockerImagePlaceholder")}
                     className="text-base md:text-sm"
                   />
                 </div>
