@@ -3,11 +3,11 @@ name: Release
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"   # stable only: v1.2.3 (not beta/rc)
+      - "v[0-9]+.[0-9]+.[0-9]+" # stable only: v1.2.3 (not beta/rc)
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v3.0.0). Leave empty to use latest tag on HEAD.'
+        description: "Release tag (e.g. v3.0.0). Leave empty to use latest tag on HEAD."
         required: false
         type: string
 
@@ -17,7 +17,7 @@ permissions:
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
-  DOCKERHUB_IMAGE: digitop/goclaw
+  DOCKERHUB_IMAGE: thanhtunguet/goclaw
 
 jobs:
   release:
@@ -104,7 +104,7 @@ jobs:
           VERSION: v${{ needs.release.outputs.version }}
         run: |
           CGO_ENABLED=0 go build -tags embedui \
-            -ldflags="-s -w -X github.com/nextlevelbuilder/goclaw/cmd.Version=${VERSION}" \
+            -ldflags="-s -w -X github.com/thanhtunguet/goclaw/cmd.Version=${VERSION}" \
             -o goclaw .
           tar -czf "goclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" goclaw migrations/
 
@@ -410,29 +410,29 @@ jobs:
             "${{ env.GHCR_IMAGE }}-web:v${{ needs.release.outputs.version }}"
 
   # Notify Discord on new release (runs even if docker jobs fail)
-  notify-discord:
-    needs: [release, build-binaries, docker-merge, docker-web-merge]
-    if: always() && needs.release.outputs.released == 'true' && !cancelled()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Send Discord notification
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          VERSION: v${{ needs.release.outputs.version }}
-        run: |
-          curl -fsSL -H "Content-Type: application/json" \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"GoClaw ${VERSION} Released\",
-                \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${VERSION}\",
-                \"color\": 5814783,
-                \"fields\": [
-                  {\"name\": \"Docker\", \"value\": \"\`docker pull digitop/goclaw:latest\`\", \"inline\": false},
-                  {\"name\": \"Install\", \"value\": \"\`curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash\`\", \"inline\": false}
-                ],
-                \"footer\": {\"text\": \"${{ github.repository }}\"},
-                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-              }]
-            }" \
-            "$DISCORD_WEBHOOK_URL"
+  # notify-discord:
+  #   needs: [release, build-binaries, docker-merge, docker-web-merge]
+  #   if: always() && needs.release.outputs.released == 'true' && !cancelled()
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - name: Send Discord notification
+  #       env:
+  #         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  #         VERSION: v${{ needs.release.outputs.version }}
+  #       run: |
+  #         curl -fsSL -H "Content-Type: application/json" \
+  #           -d "{
+  #             \"embeds\": [{
+  #               \"title\": \"GoClaw ${VERSION} Released\",
+  #               \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${VERSION}\",
+  #               \"color\": 5814783,
+  #               \"fields\": [
+  #                 {\"name\": \"Docker\", \"value\": \"\`docker pull thanhtunguet/goclaw:latest\`\", \"inline\": false},
+  #                 {\"name\": \"Install\", \"value\": \"\`curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash\`\", \"inline\": false}
+  #               ],
+  #               \"footer\": {\"text\": \"${{ github.repository }}\"},
+  #               \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+  #             }]
+  #           }" \
+  #           "$DISCORD_WEBHOOK_URL"
