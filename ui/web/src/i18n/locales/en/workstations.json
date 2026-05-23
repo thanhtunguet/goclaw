@@ -86,5 +86,22 @@
       "deny": "Denied"
     },
     "loadMore": "Load more"
+  },
+  "agents": {
+    "tabTitle": "Agents",
+    "sectionTitle": "Linked Agents",
+    "empty": "No agents linked to this workstation",
+    "emptyHint": "Link an agent so it can run commands on this workstation.",
+    "linkPlaceholder": "Select an agent…",
+    "link": "Link agent",
+    "setDefault": "Set as default",
+    "unlink": "Unlink",
+    "defaultBadge": "default",
+    "confirmUnlinkDefault": "This is the default workstation for this agent. Unlinking will clear the default binding. Continue?",
+    "confirmUnlink": "Unlink this agent from the workstation?",
+    "linkError": "Failed to link agent",
+    "unlinkError": "Failed to unlink agent",
+    "setDefaultError": "Failed to set default",
+    "noAgentsAvailable": "No agents available"
   }
 }

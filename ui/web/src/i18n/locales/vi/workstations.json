@@ -86,5 +86,22 @@
       "deny": "Từ chối"
     },
     "loadMore": "Tải thêm"
+  },
+  "agents": {
+    "tabTitle": "Agents",
+    "sectionTitle": "Agents được liên kết",
+    "empty": "Chưa có agent nào được liên kết với workstation này",
+    "emptyHint": "Liên kết agent để cho phép thực thi lệnh trên workstation này.",
+    "linkPlaceholder": "Chọn agent…",
+    "link": "Liên kết agent",
+    "setDefault": "Đặt làm mặc định",
+    "unlink": "Gỡ liên kết",
+    "defaultBadge": "mặc định",
+    "confirmUnlinkDefault": "Đây là workstation mặc định của agent này. Gỡ liên kết sẽ xóa ràng buộc mặc định. Tiếp tục?",
+    "confirmUnlink": "Gỡ liên kết agent này khỏi workstation?",
+    "linkError": "Không thể liên kết agent",
+    "unlinkError": "Không thể gỡ liên kết agent",
+    "setDefaultError": "Không thể đặt làm mặc định",
+    "noAgentsAvailable": "Không có agent nào"
   }
 }
