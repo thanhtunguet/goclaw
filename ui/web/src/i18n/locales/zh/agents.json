@@ -1108,5 +1108,22 @@
     "skillGrantFailed": "授权技能失败",
     "skillRevoked": "技能已撤销",
     "skillRevokeFailed": "撤销技能失败"
+  },
+  "workstations": {
+    "sectionTitle": "工作站访问权限",
+    "sectionDescription": "该 Agent 可执行命令的工作站",
+    "empty": "未关联任何工作站",
+    "emptyHint": "关联工作站以允许该 Agent 在远程机器上运行命令。",
+    "grantPlaceholder": "选择工作站…",
+    "grantAccess": "授予访问权限",
+    "setDefault": "设为默认",
+    "revoke": "撤销",
+    "defaultBadge": "默认",
+    "grantError": "关联工作站失败",
+    "revokeError": "撤销工作站访问权限失败",
+    "setDefaultError": "设置默认工作站失败",
+    "noWorkstationsAvailable": "暂无可用工作站",
+    "confirmRevoke": "撤销此工作站的访问权限？",
+    "confirmRevokeDefault": "撤销此默认工作站的访问权限？Agent 将失去默认工作站。"
   }
 }

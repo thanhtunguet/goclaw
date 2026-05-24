@@ -21,8 +21,8 @@ import (
 type WorkstationsMethods struct {
 	wsStore       store.WorkstationStore
 	linkStore     store.AgentWorkstationLinkStore
-	permStore     store.WorkstationPermissionStore     // may be nil if Phase 6 not wired
-	activityStore store.WorkstationActivityStore       // may be nil if Phase 7 not wired
+	permStore     store.WorkstationPermissionStore // may be nil if Phase 6 not wired
+	activityStore store.WorkstationActivityStore   // may be nil if Phase 7 not wired
 }
 
 // NewWorkstationsMethods creates WorkstationsMethods with the given stores.
@@ -51,6 +51,8 @@ func (m *WorkstationsMethods) Register(router *gateway.MethodRouter) {
 	router.Register(protocol.MethodWorkstationsTest, m.adminOnly(m.handleTestConnection))
 	router.Register(protocol.MethodWorkstationsLinkAgent, m.adminOnly(m.handleLinkAgent))
 	router.Register(protocol.MethodWorkstationsUnlinkAgent, m.adminOnly(m.handleUnlinkAgent))
+	router.Register(protocol.MethodWorkstationsLinksForAgent, m.adminOnly(m.handleLinksForAgent))
+	router.Register(protocol.MethodWorkstationsLinksForWorkstation, m.adminOnly(m.handleLinksForWorkstation))
 	// Phase 6: permission allowlist CRUD
 	router.Register(protocol.MethodWorkstationsPermList, m.adminOnly(m.handlePermList))
 	router.Register(protocol.MethodWorkstationsPermAdd, m.adminOnly(m.handlePermAdd))
@@ -122,13 +124,13 @@ func (m *WorkstationsMethods) handleGet(ctx context.Context, client *gateway.Cli
 func (m *WorkstationsMethods) handleCreate(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	locale := store.LocaleFromContext(ctx)
 	var params struct {
-		WorkstationKey string                     `json:"workstationKey"`
-		Name           string                     `json:"name"`
-		BackendType    store.WorkstationBackend   `json:"backendType"`
-		Metadata       json.RawMessage            `json:"metadata"`
-		DefaultCWD     string                     `json:"defaultCwd"`
-		DefaultEnv     json.RawMessage            `json:"defaultEnv"`
-		CreatedBy      string                     `json:"createdBy"`
+		WorkstationKey string                   `json:"workstationKey"`
+		Name           string                   `json:"name"`
+		BackendType    store.WorkstationBackend `json:"backendType"`
+		Metadata       json.RawMessage          `json:"metadata"`
+		DefaultCWD     string                   `json:"defaultCwd"`
+		DefaultEnv     json.RawMessage          `json:"defaultEnv"`
+		CreatedBy      string                   `json:"createdBy"`
 	}
 	if req.Params != nil {
 		if err := json.Unmarshal(req.Params, &params); err != nil {
@@ -338,6 +340,58 @@ func (m *WorkstationsMethods) handleUnlinkAgent(ctx context.Context, client *gat
 		return
 	}
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"unlinked": true}))
+}
+
+func (m *WorkstationsMethods) handleLinksForAgent(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+	locale := store.LocaleFromContext(ctx)
+	var params struct {
+		AgentID string `json:"agentId"`
+	}
+	if req.Params != nil {
+		if err := json.Unmarshal(req.Params, &params); err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "invalid params"))
+			return
+		}
+	}
+	agentID, err := uuid.Parse(params.AgentID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgInvalidID, "agent")))
+		return
+	}
+	links, err := m.linkStore.ListForAgent(ctx, agentID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToList, "agent_workstation_links")))
+		return
+	}
+	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"links": links}))
+}
+
+func (m *WorkstationsMethods) handleLinksForWorkstation(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+	locale := store.LocaleFromContext(ctx)
+	var params struct {
+		WorkstationID string `json:"workstationId"`
+	}
+	if req.Params != nil {
+		if err := json.Unmarshal(req.Params, &params); err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "invalid params"))
+			return
+		}
+	}
+	wsID, err := uuid.Parse(params.WorkstationID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgInvalidID, "workstation")))
+		return
+	}
+	links, err := m.linkStore.ListForWorkstation(ctx, wsID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToList, "agent_workstation_links")))
+		return
+	}
+	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"links": links}))
 }
 
 // --- Phase 6: workstation permission allowlist CRUD ---

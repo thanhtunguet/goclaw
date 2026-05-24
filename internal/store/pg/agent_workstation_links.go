@@ -31,7 +31,7 @@ func (s *PGAgentWorkstationLinkStore) Link(ctx context.Context, link *store.Agen
 	_, err := s.db.ExecContext(ctx,
 		`INSERT INTO agent_workstation_links (agent_id, workstation_id, tenant_id, is_default, created_at)
 		 VALUES ($1,$2,$3,$4,$5)
-		 ON CONFLICT (agent_id, workstation_id) DO NOTHING`,
+		 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = EXCLUDED.is_default`,
 		link.AgentID, link.WorkstationID, tid, link.IsDefault, link.CreatedAt,
 	)
 	return err

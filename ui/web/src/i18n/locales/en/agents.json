@@ -1123,5 +1123,22 @@
     "skillGrantFailed": "Failed to grant skill",
     "skillRevoked": "Skill revoked",
     "skillRevokeFailed": "Failed to revoke skill"
+  },
+  "workstations": {
+    "sectionTitle": "Workstation Access",
+    "sectionDescription": "Workstations this agent can execute commands on",
+    "empty": "No workstations linked",
+    "emptyHint": "Link a workstation so this agent can run commands on remote machines.",
+    "grantPlaceholder": "Select a workstation…",
+    "grantAccess": "Grant access",
+    "setDefault": "Set as default",
+    "revoke": "Revoke",
+    "defaultBadge": "default",
+    "grantError": "Failed to link workstation",
+    "revokeError": "Failed to revoke workstation access",
+    "setDefaultError": "Failed to set default workstation",
+    "noWorkstationsAvailable": "No workstations available",
+    "confirmRevoke": "Revoke access to this workstation?",
+    "confirmRevokeDefault": "Revoke access to this default workstation? The agent will lose its default workstation."
   }
 }

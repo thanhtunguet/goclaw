@@ -1108,5 +1108,22 @@
     "skillGrantFailed": "Không thể cấp skill",
     "skillRevoked": "Đã thu hồi skill",
     "skillRevokeFailed": "Không thể thu hồi skill"
+  },
+  "workstations": {
+    "sectionTitle": "Quyền truy cập Workstation",
+    "sectionDescription": "Các workstation agent này có thể thực thi lệnh",
+    "empty": "Chưa liên kết workstation nào",
+    "emptyHint": "Liên kết workstation để agent có thể chạy lệnh trên máy từ xa.",
+    "grantPlaceholder": "Chọn workstation…",
+    "grantAccess": "Cấp quyền truy cập",
+    "setDefault": "Đặt làm mặc định",
+    "revoke": "Thu hồi",
+    "defaultBadge": "mặc định",
+    "grantError": "Không thể liên kết workstation",
+    "revokeError": "Không thể thu hồi quyền truy cập workstation",
+    "setDefaultError": "Không thể đặt workstation mặc định",
+    "noWorkstationsAvailable": "Không có workstation nào",
+    "confirmRevoke": "Gỡ quyền truy cập workstation này?",
+    "confirmRevokeDefault": "Gỡ quyền truy cập workstation mặc định này? Agent sẽ mất workstation mặc định."
   }
 }
