@@ -33,8 +33,13 @@ export function useWorkstationLinks(params: LinkParams) {
   const [workstations, setWorkstations] = useState<WorkstationInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const entityId = params.mode === "forWorkstation" ? params.workstationId : params.agentId;
+
   const refresh = useCallback(async () => {
-    if (!connected) return;
+    if (!connected) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       if (params.mode === "forWorkstation") {
@@ -53,9 +58,9 @@ export function useWorkstationLinks(params: LinkParams) {
             { workstationId: params.workstationId },
           );
           setLinks(res.links ?? []);
-        } catch {
-          // Backend method may not be registered yet — start with empty list
-          // Links will be reflected via optimistic updates after mutations
+        } catch (e) {
+          // Backend list method may not be registered yet; links maintained via optimistic updates
+          console.warn("workstation links: list method unavailable", e);
         }
       } else {
         // Load all workstations for the picker
@@ -75,20 +80,18 @@ export function useWorkstationLinks(params: LinkParams) {
             { agentId: params.agentId },
           );
           setLinks(res.links ?? []);
-        } catch {
-          // Backend method may not be registered yet — start with empty list
-          // Links will be reflected via optimistic updates after mutations
+        } catch (e) {
+          // Backend list method may not be registered yet; links maintained via optimistic updates
+          console.warn("workstation links: list method unavailable", e);
         }
       }
     } finally {
       setLoading(false);
     }
-  }, [connected, http, ws, params.mode,
-    params.mode === "forWorkstation" ? params.workstationId : (params as { mode: "forAgent"; agentId: string }).agentId]);
+  }, [connected, http, ws, params.mode, entityId]);
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   const linkAgent = useCallback(
