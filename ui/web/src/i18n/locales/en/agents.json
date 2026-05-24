@@ -1137,6 +1137,8 @@
     "grantError": "Failed to link workstation",
     "revokeError": "Failed to revoke workstation access",
     "setDefaultError": "Failed to set default workstation",
-    "noWorkstationsAvailable": "No workstations available"
+    "noWorkstationsAvailable": "No workstations available",
+    "confirmRevoke": "Revoke access to this workstation?",
+    "confirmRevokeDefault": "Revoke access to this default workstation? The agent will lose its default workstation."
   }
 }

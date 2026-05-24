@@ -1122,6 +1122,8 @@
     "grantError": "关联工作站失败",
     "revokeError": "撤销工作站访问权限失败",
     "setDefaultError": "设置默认工作站失败",
-    "noWorkstationsAvailable": "暂无可用工作站"
+    "noWorkstationsAvailable": "暂无可用工作站",
+    "confirmRevoke": "撤销此工作站的访问权限？",
+    "confirmRevokeDefault": "撤销此默认工作站的访问权限？Agent 将失去默认工作站。"
   }
 }

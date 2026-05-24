@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/stores/use-toast-store";
 import { useWorkstationLinks } from "@/pages/workstations/hooks/use-workstation-links";
 
 interface WorkstationLinksSectionProps {
@@ -30,47 +31,48 @@ export function WorkstationLinksSection({ agentId }: WorkstationLinksSectionProp
 
   const [selectedWorkstationId, setSelectedWorkstationId] = useState<string>("");
   const [mutating, setMutating] = useState<string | null>(null);
-  const [granting, setGranting] = useState(false);
 
   // Workstations not yet linked to this agent
   const linkedWorkstationIds = new Set(links.map((l) => l.workstationId));
   const availableWorkstations = workstations.filter((w) => !linkedWorkstationIds.has(w.id));
 
   async function handleGrant() {
-    if (!selectedWorkstationId) return;
-    setGranting(true);
+    if (!selectedWorkstationId || mutating !== null) return;
+    setMutating("__granting__");
     try {
       await linkAgent(agentId, selectedWorkstationId, links.length === 0);
       setSelectedWorkstationId("");
     } catch {
-      window.alert(t("workstations.grantError"));
+      toast.error(t("workstations.grantError"));
     } finally {
-      setGranting(false);
+      setMutating(null);
     }
   }
 
   async function handleSetDefault(workstationId: string) {
+    if (mutating !== null) return;
     setMutating(workstationId);
     try {
       await setDefault(agentId, workstationId);
     } catch {
-      window.alert(t("workstations.setDefaultError"));
+      toast.error(t("workstations.setDefaultError"));
     } finally {
       setMutating(null);
     }
   }
 
   async function handleRevoke(workstationId: string, isDefault: boolean) {
+    if (mutating !== null) return;
     const message = isDefault
-      ? "Revoke access to this default workstation? The agent will lose its default workstation."
-      : "Revoke access to this workstation?";
+      ? t("workstations.confirmRevokeDefault")
+      : t("workstations.confirmRevoke");
     if (!window.confirm(message)) return;
 
     setMutating(workstationId);
     try {
       await unlinkAgent(agentId, workstationId);
     } catch {
-      window.alert(t("workstations.revokeError"));
+      toast.error(t("workstations.revokeError"));
     } finally {
       setMutating(null);
     }
@@ -111,7 +113,11 @@ export function WorkstationLinksSection({ agentId }: WorkstationLinksSectionProp
 
       {/* Workstation picker */}
       <div className="flex items-center gap-2">
-        <Select value={selectedWorkstationId} onValueChange={setSelectedWorkstationId}>
+        <Select
+          value={selectedWorkstationId}
+          onValueChange={setSelectedWorkstationId}
+          disabled={availableWorkstations.length === 0 || mutating !== null}
+        >
           <SelectTrigger className="flex-1 text-base md:text-sm">
             <SelectValue
               placeholder={
@@ -131,11 +137,11 @@ export function WorkstationLinksSection({ agentId }: WorkstationLinksSectionProp
         </Select>
         <Button
           size="sm"
-          disabled={!selectedWorkstationId || granting || mutating !== null}
+          disabled={!selectedWorkstationId || mutating !== null || availableWorkstations.length === 0}
           onClick={handleGrant}
           className="gap-1.5 shrink-0"
         >
-          {granting ? (
+          {mutating === "__granting__" ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Monitor className="h-3.5 w-3.5" />

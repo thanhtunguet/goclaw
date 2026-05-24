@@ -1122,6 +1122,8 @@
     "grantError": "Không thể liên kết workstation",
     "revokeError": "Không thể thu hồi quyền truy cập workstation",
     "setDefaultError": "Không thể đặt workstation mặc định",
-    "noWorkstationsAvailable": "Không có workstation nào"
+    "noWorkstationsAvailable": "Không có workstation nào",
+    "confirmRevoke": "Gỡ quyền truy cập workstation này?",
+    "confirmRevokeDefault": "Gỡ quyền truy cập workstation mặc định này? Agent sẽ mất workstation mặc định."
   }
 }
