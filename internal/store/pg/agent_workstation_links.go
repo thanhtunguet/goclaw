@@ -28,13 +28,39 @@ func (s *PGAgentWorkstationLinkStore) Link(ctx context.Context, link *store.Agen
 	}
 	link.TenantID = tid
 	link.CreatedAt = time.Now()
-	_, err := s.db.ExecContext(ctx,
+
+	if !link.IsDefault {
+		_, err := s.db.ExecContext(ctx,
+			`INSERT INTO agent_workstation_links (agent_id, workstation_id, tenant_id, is_default, created_at)
+			 VALUES ($1,$2,$3,$4,$5)
+			 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = EXCLUDED.is_default`,
+			link.AgentID, link.WorkstationID, tid, false, link.CreatedAt,
+		)
+		return err
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx,
+		`UPDATE agent_workstation_links SET is_default = FALSE
+		 WHERE agent_id = $1 AND tenant_id = $2`,
+		link.AgentID, tid,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx,
 		`INSERT INTO agent_workstation_links (agent_id, workstation_id, tenant_id, is_default, created_at)
 		 VALUES ($1,$2,$3,$4,$5)
 		 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = EXCLUDED.is_default`,
-		link.AgentID, link.WorkstationID, tid, link.IsDefault, link.CreatedAt,
-	)
-	return err
+		link.AgentID, link.WorkstationID, tid, true, link.CreatedAt,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *PGAgentWorkstationLinkStore) Unlink(ctx context.Context, agentID, workstationID uuid.UUID) error {

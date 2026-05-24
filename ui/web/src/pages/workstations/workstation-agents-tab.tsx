@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/stores/use-toast-store";
+import { useWs } from "@/hooks/use-ws";
+import { Methods } from "@/api/protocol";
 import {
   useWorkstationLinks,
 } from "./hooks/use-workstation-links";
@@ -27,6 +29,7 @@ interface WorkstationAgentsTabProps {
 
 export function WorkstationAgentsTab({ workstationId }: WorkstationAgentsTabProps) {
   const { t } = useTranslation("workstations");
+  const ws = useWs();
   const { links, agents, loading, linkAgent, unlinkAgent, setDefault } =
     useWorkstationLinks({ mode: "forWorkstation", workstationId });
 
@@ -41,7 +44,13 @@ export function WorkstationAgentsTab({ workstationId }: WorkstationAgentsTabProp
     if (!selectedAgentId) return;
     setMutating(selectedAgentId);
     try {
-      await linkAgent(selectedAgentId, workstationId, links.length === 0);
+      const agentLinksRes = await ws.call<{ links: { agentId: string }[] }>(
+        Methods.WORKSTATIONS_LINKS_FOR_AGENT,
+        { agentId: selectedAgentId },
+      );
+      const isFirstLinkForAgent = (agentLinksRes.links ?? []).length === 0;
+
+      await linkAgent(selectedAgentId, workstationId, isFirstLinkForAgent);
       setSelectedAgentId("");
     } catch {
       toast.error(t("agents.linkError"));

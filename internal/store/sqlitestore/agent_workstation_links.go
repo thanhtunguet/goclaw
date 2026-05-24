@@ -30,15 +30,42 @@ func (s *SQLiteAgentWorkstationLinkStore) Link(ctx context.Context, link *store.
 	}
 	link.TenantID = tid
 	link.CreatedAt = time.Now().UTC()
-	_, err := s.db.ExecContext(ctx,
+
+	if !link.IsDefault {
+		_, err := s.db.ExecContext(ctx,
+			`INSERT INTO agent_workstation_links
+			 (agent_id, workstation_id, tenant_id, is_default, created_at)
+			 VALUES (?,?,?,?,?)
+			 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = excluded.is_default`,
+			link.AgentID.String(), link.WorkstationID.String(), tid.String(),
+			0, link.CreatedAt.Format(time.RFC3339Nano),
+		)
+		return err
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx,
+		`UPDATE agent_workstation_links SET is_default = 0 WHERE agent_id = ? AND tenant_id = ?`,
+		link.AgentID.String(), tid.String(),
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx,
 		`INSERT INTO agent_workstation_links
 		 (agent_id, workstation_id, tenant_id, is_default, created_at)
 		 VALUES (?,?,?,?,?)
 		 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = excluded.is_default`,
 		link.AgentID.String(), link.WorkstationID.String(), tid.String(),
-		boolToInt(link.IsDefault), link.CreatedAt.Format(time.RFC3339Nano),
-	)
-	return err
+		1, link.CreatedAt.Format(time.RFC3339Nano),
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *SQLiteAgentWorkstationLinkStore) Unlink(ctx context.Context, agentID, workstationID uuid.UUID) error {
