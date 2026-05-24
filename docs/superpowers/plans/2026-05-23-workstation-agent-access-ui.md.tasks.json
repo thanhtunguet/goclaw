@@ -4,50 +4,50 @@
     {
       "id": 3,
       "subject": "Task 1: i18n keys for workstations namespace",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Add all new translation keys to all 3 locale files for the `workstations` namespace.\n\n**Files:**\n- Modify: `ui/web/src/i18n/locales/en/workstations.json`\n- Modify: `ui/web/src/i18n/locales/vi/workstations.json`\n- Modify: `ui/web/src/i18n/locales/zh/workstations.json`\n\n**Acceptance Criteria:**\n- [ ] `workstations.agents.*` keys present in all 3 locale files\n\n**Verify:** `grep -r '\"agents\"' ui/web/src/i18n/locales/*/workstations.json | wc -l` → 3\n\n```json:metadata\n{\"files\": [\"ui/web/src/i18n/locales/en/workstations.json\",\"ui/web/src/i18n/locales/vi/workstations.json\",\"ui/web/src/i18n/locales/zh/workstations.json\"], \"verifyCommand\": \"grep -r '\\\"agents\\\"' ui/web/src/i18n/locales/*/workstations.json | wc -l\", \"acceptanceCriteria\": [\"workstations.agents.* keys present in all 3 locale files\"]}\n```"
     },
     {
       "id": 4,
       "subject": "Task 2: i18n keys for agents namespace",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Add workstation-links section keys to all 3 locale files for the `agents` namespace.\n\n**Files:**\n- Modify: `ui/web/src/i18n/locales/en/agents.json`\n- Modify: `ui/web/src/i18n/locales/vi/agents.json`\n- Modify: `ui/web/src/i18n/locales/zh/agents.json`\n\n**Acceptance Criteria:**\n- [ ] `agents.workstations.*` keys present in all 3 locale files\n\n**Verify:** `grep -r '\"workstations\"' ui/web/src/i18n/locales/*/agents.json | wc -l` → 3\n\n```json:metadata\n{\"files\": [\"ui/web/src/i18n/locales/en/agents.json\",\"ui/web/src/i18n/locales/vi/agents.json\",\"ui/web/src/i18n/locales/zh/agents.json\"], \"verifyCommand\": \"grep -r '\\\"workstations\\\"' ui/web/src/i18n/locales/*/agents.json | wc -l\", \"acceptanceCriteria\": [\"agents.workstations.* keys present in all 3 locale files\"]}\n```"
     },
     {
       "id": 5,
       "subject": "Task 3: Shared hook use-workstation-links.ts",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [3, 4],
       "description": "**Goal:** Create the shared hook used by both workstation and agent views.\n\n**Files:**\n- Create: `ui/web/src/pages/workstations/hooks/use-workstation-links.ts`\n\n**Acceptance Criteria:**\n- [ ] Exports AgentWorkstationLink and WorkstationInfo interfaces\n- [ ] linkAgent/unlinkAgent/setDefault call correct WS methods\n- [ ] Optimistic updates on mutations\n\n**Verify:** `cd ui/web && pnpm tsc --noEmit 2>&1 | grep use-workstation-links` → no output\n\n```json:metadata\n{\"files\": [\"ui/web/src/pages/workstations/hooks/use-workstation-links.ts\"], \"verifyCommand\": \"cd ui/web && pnpm tsc --noEmit 2>&1 | grep use-workstation-links\", \"acceptanceCriteria\": [\"Hook exports AgentWorkstationLink type\",\"linkAgent/unlinkAgent/setDefault call correct WS methods\"]}\n```"
     },
     {
       "id": 6,
       "subject": "Task 4: WorkstationAgentsTab component",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [5],
       "description": "**Goal:** Create the Agents tab content for the expanded workstation row.\n\n**Files:**\n- Create: `ui/web/src/pages/workstations/workstation-agents-tab.tsx`\n\n**Acceptance Criteria:**\n- [ ] Renders linked agents list with default badge\n- [ ] Select to link new agent\n- [ ] Set default and unlink buttons\n- [ ] Empty state and loading spinner\n\n**Verify:** `cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstation-agents-tab` → no output\n\n```json:metadata\n{\"files\": [\"ui/web/src/pages/workstations/workstation-agents-tab.tsx\"], \"verifyCommand\": \"cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstation-agents-tab\", \"acceptanceCriteria\": [\"Renders linked agents list\",\"Link/unlink/setDefault actions work\"]}\n```"
     },
     {
       "id": 7,
       "subject": "Task 5: Wire WorkstationAgentsTab into workstations-page.tsx",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [6],
       "description": "**Goal:** Add Agents tab to the expanded workstation row.\n\n**Files:**\n- Modify: `ui/web/src/pages/workstations/workstations-page.tsx`\n\n**Acceptance Criteria:**\n- [ ] Two tabs: Activity and Agents\n- [ ] Agents tab renders WorkstationAgentsTab\n\n**Verify:** `cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstations-page` → no output\n\n```json:metadata\n{\"files\": [\"ui/web/src/pages/workstations/workstations-page.tsx\"], \"verifyCommand\": \"cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstations-page\", \"acceptanceCriteria\": [\"Agents tab appears in expanded row\"]}\n```"
     },
     {
       "id": 8,
       "subject": "Task 6: WorkstationLinksSection component",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [5],
       "description": "**Goal:** Create the workstation-links section for the agent permissions tab.\n\n**Files:**\n- Create: `ui/web/src/pages/agents/agent-detail/workstation-links-section.tsx`\n\n**Acceptance Criteria:**\n- [ ] Renders linked workstations with default badge\n- [ ] Select to grant access\n- [ ] Set default and revoke buttons\n- [ ] Uses agents namespace i18n keys\n\n**Verify:** `cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstation-links-section` → no output\n\n```json:metadata\n{\"files\": [\"ui/web/src/pages/agents/agent-detail/workstation-links-section.tsx\"], \"verifyCommand\": \"cd ui/web && pnpm tsc --noEmit 2>&1 | grep workstation-links-section\", \"acceptanceCriteria\": [\"Renders linked workstations\",\"Grant/revoke/setDefault work\"]}\n```"
     },
     {
       "id": 9,
       "subject": "Task 7: Wire WorkstationLinksSection into AgentPermissionsTab",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [8],
       "description": "**Goal:** Append WorkstationLinksSection at the bottom of the agent permissions tab.\n\n**Files:**\n- Modify: `ui/web/src/pages/agents/agent-detail/agent-permissions-tab.tsx`\n\n**Acceptance Criteria:**\n- [ ] WorkstationLinksSection appended below existing content\n- [ ] Build passes\n\n**Verify:** `cd ui/web && pnpm build 2>&1 | tail -5` → no errors\n\n```json:metadata\n{\"files\": [\"ui/web/src/pages/agents/agent-detail/agent-permissions-tab.tsx\"], \"verifyCommand\": \"cd ui/web && pnpm build 2>&1 | tail -5\", \"acceptanceCriteria\": [\"WorkstationLinksSection appended\",\"Build passes\"]}\n```"
     }
   ],
-  "lastUpdated": "2026-05-23T00:00:00Z"
+  "lastUpdated": "2026-05-23T12:00:00Z"
 }
