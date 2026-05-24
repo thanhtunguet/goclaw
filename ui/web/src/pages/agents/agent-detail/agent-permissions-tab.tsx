@@ -15,6 +15,7 @@ import { useWs, useHttp } from "@/hooks/use-ws";
 import { Methods } from "@/api/protocol";
 import type { ChannelContact } from "@/types/contact";
 import type { DeliveryTarget } from "../hooks/use-agent-heartbeat";
+import { WorkstationLinksSection } from "./workstation-links-section";
 
 const CONFIG_TYPES = [
   { value: "file_writer",   label: "File Writer",   descKey: "permissions.types.file_writer_desc" },
@@ -187,6 +188,7 @@ export function AgentPermissionsTab({ agentId }: AgentPermissionsTabProps) {
   const currentDescKey = CONFIG_TYPES.find((c) => c.value === configType)?.descKey ?? "";
 
   return (
+    <>
     <section className="space-y-4 rounded-lg border p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
@@ -393,5 +395,7 @@ export function AgentPermissionsTab({ agentId }: AgentPermissionsTabProps) {
         </div>
       )}
     </section>
+    <WorkstationLinksSection agentId={agentId} />
+    </>
   );
 }
