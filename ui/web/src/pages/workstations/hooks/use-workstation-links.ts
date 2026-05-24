@@ -51,16 +51,15 @@ export function useWorkstationLinks(params: LinkParams) {
           console.warn("[useWorkstationLinks] failed to load agents:", err);
         }
 
-        // Try to load current links for this workstation
+        // Load current links for this workstation
         try {
           const res = await ws.call<{ links: AgentWorkstationLink[] }>(
-            "workstations.list_agents",
+            Methods.WORKSTATIONS_LINKS_FOR_WORKSTATION,
             { workstationId: params.workstationId },
           );
           setLinks(res.links ?? []);
         } catch (e) {
-          // Backend list method may not be registered yet; links maintained via optimistic updates
-          console.warn("workstation links: list method unavailable", e);
+          console.warn("workstation links: failed to load links for workstation", e);
         }
       } else {
         // Load all workstations for the picker
@@ -73,16 +72,15 @@ export function useWorkstationLinks(params: LinkParams) {
           console.warn("[useWorkstationLinks] failed to load workstations:", err);
         }
 
-        // Try to load current links for this agent
+        // Load current links for this agent
         try {
           const res = await ws.call<{ links: AgentWorkstationLink[] }>(
-            "workstations.list_for_agent",
+            Methods.WORKSTATIONS_LINKS_FOR_AGENT,
             { agentId: params.agentId },
           );
           setLinks(res.links ?? []);
         } catch (e) {
-          // Backend list method may not be registered yet; links maintained via optimistic updates
-          console.warn("workstation links: list method unavailable", e);
+          console.warn("workstation links: failed to load links for agent", e);
         }
       }
     } finally {

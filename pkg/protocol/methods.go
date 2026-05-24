@@ -199,14 +199,16 @@ const (
 
 // Workstations (Standard edition only — gated at router)
 const (
-	MethodWorkstationsList        = "workstations.list"
-	MethodWorkstationsGet         = "workstations.get"
-	MethodWorkstationsCreate      = "workstations.create"
-	MethodWorkstationsUpdate      = "workstations.update"
-	MethodWorkstationsDelete      = "workstations.delete"
-	MethodWorkstationsTest        = "workstations.testConnection"
-	MethodWorkstationsLinkAgent   = "workstations.linkAgent"
-	MethodWorkstationsUnlinkAgent = "workstations.unlinkAgent"
+	MethodWorkstationsList                = "workstations.list"
+	MethodWorkstationsGet                 = "workstations.get"
+	MethodWorkstationsCreate              = "workstations.create"
+	MethodWorkstationsUpdate              = "workstations.update"
+	MethodWorkstationsDelete              = "workstations.delete"
+	MethodWorkstationsTest                = "workstations.testConnection"
+	MethodWorkstationsLinkAgent           = "workstations.linkAgent"
+	MethodWorkstationsUnlinkAgent         = "workstations.unlinkAgent"
+	MethodWorkstationsLinksForAgent       = "workstations.links.forAgent"
+	MethodWorkstationsLinksForWorkstation = "workstations.links.forWorkstation"
 
 	// Workstation permission allowlist CRUD (Phase 6)
 	MethodWorkstationsPermList   = "workstations.permissions.list"

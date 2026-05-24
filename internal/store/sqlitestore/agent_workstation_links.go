@@ -31,9 +31,10 @@ func (s *SQLiteAgentWorkstationLinkStore) Link(ctx context.Context, link *store.
 	link.TenantID = tid
 	link.CreatedAt = time.Now().UTC()
 	_, err := s.db.ExecContext(ctx,
-		`INSERT OR IGNORE INTO agent_workstation_links
+		`INSERT INTO agent_workstation_links
 		 (agent_id, workstation_id, tenant_id, is_default, created_at)
-		 VALUES (?,?,?,?,?)`,
+		 VALUES (?,?,?,?,?)
+		 ON CONFLICT (agent_id, workstation_id) DO UPDATE SET is_default = excluded.is_default`,
 		link.AgentID.String(), link.WorkstationID.String(), tid.String(),
 		boolToInt(link.IsDefault), link.CreatedAt.Format(time.RFC3339Nano),
 	)
