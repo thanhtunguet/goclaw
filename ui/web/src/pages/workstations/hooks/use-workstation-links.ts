@@ -99,32 +99,9 @@ export function useWorkstationLinks(params: LinkParams) {
         workstationId,
         isDefault,
       });
-
-      // Optimistic update
-      setLinks((prev) => {
-        // Determine if this is the first link for the agent
-        const existingForAgent = prev.filter((l) => l.agentId === agentId);
-        const isFirstLink = existingForAgent.length === 0;
-        const effectiveIsDefault = isDefault || isFirstLink;
-
-        // Remove any existing link with same (agentId, workstationId)
-        let updated = prev.filter(
-          (l) => !(l.agentId === agentId && l.workstationId === workstationId),
-        );
-
-        // If setting as default, clear isDefault on all other links for this agent
-        if (effectiveIsDefault) {
-          updated = updated.map((l) =>
-            l.agentId === agentId ? { ...l, isDefault: false } : l,
-          );
-        }
-
-        // Push new link
-        updated.push({ agentId, workstationId, isDefault: effectiveIsDefault });
-        return updated;
-      });
+      await refresh();
     },
-    [ws],
+    [ws, refresh],
   );
 
   const unlinkAgent = useCallback(
@@ -133,15 +110,9 @@ export function useWorkstationLinks(params: LinkParams) {
         agentId,
         workstationId,
       });
-
-      // Optimistic update: filter out the removed link
-      setLinks((prev) =>
-        prev.filter(
-          (l) => !(l.agentId === agentId && l.workstationId === workstationId),
-        ),
-      );
+      await refresh();
     },
-    [ws],
+    [ws, refresh],
   );
 
   const setDefault = useCallback(
@@ -151,17 +122,9 @@ export function useWorkstationLinks(params: LinkParams) {
         workstationId,
         isDefault: true,
       });
-
-      // Optimistic update: for all links with same agentId, set isDefault based on workstationId match
-      setLinks((prev) =>
-        prev.map((l) =>
-          l.agentId === agentId
-            ? { ...l, isDefault: l.workstationId === workstationId }
-            : l,
-        ),
-      );
+      await refresh();
     },
-    [ws],
+    [ws, refresh],
   );
 
   return {
