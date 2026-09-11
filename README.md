@@ -252,7 +252,11 @@ Open **About** dialog → click **Update Now** (admin only). The update includes
   <img src="_statics/Agent Orchestration.jpg" alt="Agent Orchestration" width="800" />
 </p>
 
-Each agent runs with its own identity, tools, LLM provider, and context files. Three delegation modes — sync (wait), async (fire-and-forget), bidirectional — connected through explicit permission links with concurrency limits.
+Each agent runs with its own identity, tools, LLM provider, and context files.
+Agent Links define outbound, inbound, or bidirectional permission edges.
+Delegation can run synchronously or asynchronously and exchanges files through
+an isolated delegation workspace; validated outputs are published back under
+the caller's `.delegations/<delegation-id>/` directory.
 
 > Details: [Agent Teams docs](https://docs.goclaw.sh/#teams-what-are-teams)
 
@@ -366,10 +370,10 @@ GoClaw was originally inspired by the [OpenClaw](https://github.com/openclaw/ope
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=nextlevelbuilder%2Fgoclaw&type=date&legend=top-left">
+<a href="https://star-history.dera.page/#nextlevelbuilder/goclaw&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=nextlevelbuilder/goclaw&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=nextlevelbuilder/goclaw&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=nextlevelbuilder/goclaw&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=nextlevelbuilder/goclaw&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=nextlevelbuilder/goclaw&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=nextlevelbuilder/goclaw&type=date&legend=top-left" />
  </picture>
 </a>
