@@ -21,7 +21,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkstationAgents } from "./hooks/use-workstation-agents";
 import { useWorkstations } from "./hooks/use-workstations";
-import { useAgents, type AgentData } from "../agents/hooks/use-agents";
+import { useAgents } from "../agents/hooks/use-agents";
+import type { AgentData } from "@/types/agent";
 
 interface WorkstationAgentsTabProps {
   workstationId: string;

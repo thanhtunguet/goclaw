@@ -15,7 +15,6 @@ import { useWorkstations, type Workstation } from "./hooks/use-workstations";
 import { WorkstationCreateDialog } from "./workstation-create-dialog";
 import { WorkstationActivityTab } from "./workstation-activity-tab";
 import { WorkstationAgentsTab } from "./workstation-agents-tab";
-import { WorkstationAgentsTab } from "./workstation-agents-tab";
 
 export function WorkstationsPage() {
   const { t } = useTranslation("workstations");
