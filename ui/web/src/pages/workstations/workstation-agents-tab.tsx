@@ -39,6 +39,7 @@ export function WorkstationAgentsTab({ workstationId }: WorkstationAgentsTabProp
   const [unlinkTarget, setUnlinkTarget] = useState<string | null>(null);
   const [isLinking, setIsLinking] = useState(false);
   const [isUnlinking, setIsUnlinking] = useState(false);
+  const [settingDefaultAgentId, setSettingDefaultAgentId] = useState<string | null>(null);
 
   // Filter agents that are not already linked
   const linkedAgentIds = new Set(agents.map((a) => a.agentId));
@@ -70,6 +71,18 @@ export function WorkstationAgentsTab({ workstationId }: WorkstationAgentsTabProp
       console.error("Failed to unlink agent:", err);
     } finally {
       setIsUnlinking(false);
+    }
+  }
+
+  async function handleSetDefault(agentId: string) {
+    setSettingDefaultAgentId(agentId);
+    try {
+      await linkAgent(workstationId, agentId, true);
+      await refresh();
+    } catch (err) {
+      console.error("Failed to set default workstation:", err);
+    } finally {
+      setSettingDefaultAgentId(null);
     }
   }
 
@@ -161,11 +174,25 @@ export function WorkstationAgentsTab({ workstationId }: WorkstationAgentsTabProp
                     {agent.agentKey || "—"}
                   </td>
                   <td className="px-3 py-2">
-                    <Badge variant="outline" className="text-xs">
-                      {t("agents.status.linked")}
-                    </Badge>
+                    <div className="flex gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {t("agents.status.linked")}
+                      </Badge>
+                      {agent.isDefault && <Badge className="text-xs">{t("agents.status.default")}</Badge>}
+                    </div>
                   </td>
                   <td className="px-3 py-2 text-right">
+                    {!agent.isDefault && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        onClick={() => void handleSetDefault(agent.agentId)}
+                        disabled={settingDefaultAgentId !== null}
+                      >
+                        {settingDefaultAgentId === agent.agentId ? t("common:saving", "Saving...") : t("agents.setDefault")}
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"

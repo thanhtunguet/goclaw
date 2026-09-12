@@ -101,13 +101,31 @@
   },
   "tabs": {
     "agents": "Agents",
+    "permissions": "Quyền lệnh",
     "activity": "Hoạt động"
+  },
+  "permissions": {
+    "title": "Quyền thực thi lệnh",
+    "description": "Cho phép tệp thực thi theo tên chính xác hoặc tiền tố có ký tự đại diện (ví dụ git hoặc python*). Shell và * đứng riêng luôn bị chặn.",
+    "patternLabel": "Tên tệp thực thi hoặc tiền tố có ký tự đại diện",
+    "patternPlaceholder": "ví dụ npm hoặc python*",
+    "add": "Cho phép lệnh",
+    "remove": "Xóa quyền",
+    "empty": "Chưa có lệnh nào được cho phép. Agent đã liên kết không thể chạy lệnh cho đến khi bạn thêm quyền.",
+    "columns": { "pattern": "Tệp thực thi được phép", "enabled": "Bật", "actions": "Thao tác" },
+    "errors": {
+      "invalidPattern": "Nhập tên tệp thực thi hoặc tiền tố có ký tự đại diện; không cho phép * đứng riêng.",
+      "addFailed": "Không thể thêm quyền lệnh.",
+      "updateFailed": "Không thể cập nhật quyền lệnh.",
+      "removeFailed": "Không thể xóa quyền lệnh."
+    }
   },
   "agents": {
     "title": "Agents đã liên kết",
     "emptyTitle": "Chưa có agent nào được liên kết",
     "emptyDescription": "Liên kết agents với workstation này để cho phép chúng thực thi lệnh.",
     "linkAgent": "Liên kết Agent",
+    "setDefault": "Đặt mặc định",
     "unlink": "Hủy liên kết",
     "linking": "Đang liên kết...",
     "unlinking": "Đang hủy liên kết...",
@@ -118,7 +136,8 @@
       "actions": "Thao tác"
     },
     "status": {
-      "linked": "Đã liên kết"
+      "linked": "Đã liên kết",
+      "default": "Mặc định"
     },
     "linkDialog": {
       "title": "Liên kết Agent với Workstation",

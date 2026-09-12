@@ -302,15 +302,59 @@ func (m *WorkstationsMethods) handleLinkAgent(ctx context.Context, client *gatew
 			i18n.T(locale, i18n.MsgInvalidID, "workstation")))
 		return
 	}
+	// Verify both ends of the link through tenant-scoped stores before writing.
+	// The database FKs prove that IDs exist, but cannot prove they belong to the
+	// current tenant.
+	if _, err := m.wsStore.GetByID(ctx, wsID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound,
+				i18n.T(locale, i18n.MsgWorkstationNotFound, params.WorkstationID)))
+			return
+		}
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgInternalError, err.Error())))
+		return
+	}
+	if m.agentStore != nil {
+		if _, err := m.agentStore.GetByID(ctx, agentID); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound,
+					i18n.T(locale, i18n.MsgAgentNotFound, params.AgentID)))
+				return
+			}
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+				i18n.T(locale, i18n.MsgInternalError, err.Error())))
+			return
+		}
+	}
+	existingLinks, err := m.linkStore.ListForAgent(ctx, agentID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgInternalError, err.Error())))
+		return
+	}
 	link := &store.AgentWorkstationLink{
 		AgentID:       agentID,
 		WorkstationID: wsID,
-		IsDefault:     params.IsDefault,
+		// SetDefault below clears any prior default atomically. Inserting a new
+		// default first would violate the partial unique index for agents that
+		// already have one.
+		IsDefault: false,
 	}
 	if err := m.linkStore.Link(ctx, link); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
 			i18n.T(locale, i18n.MsgFailedToCreate, "agent_workstation_link", err.Error())))
 		return
+	}
+	// A sole link must resolve without requiring an explicit workstation_id.
+	// The UI does not ask for a default during a first link, so make it the
+	// default server-side. Explicit default selection continues to take priority.
+	if params.IsDefault || len(existingLinks) == 0 {
+		if err := m.linkStore.SetDefault(ctx, agentID, wsID); err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+				i18n.T(locale, i18n.MsgFailedToUpdate, "agent_workstation_link", err.Error())))
+			return
+		}
 	}
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"linked": true}))
 }

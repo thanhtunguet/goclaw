@@ -101,13 +101,31 @@
   },
   "tabs": {
     "agents": "Agents",
+    "permissions": "权限",
     "activity": "活动"
+  },
+  "permissions": {
+    "title": "命令权限",
+    "description": "按确切名称或前缀通配符允许可执行文件（例如 git 或 python*）。Shell 和单独的 * 始终不允许。",
+    "patternLabel": "可执行文件名称或前缀通配符",
+    "patternPlaceholder": "例如 npm 或 python*",
+    "add": "允许命令",
+    "remove": "删除权限",
+    "empty": "尚未允许任何命令。关联的 Agent 在添加权限前无法执行命令。",
+    "columns": { "pattern": "允许的可执行文件", "enabled": "已启用", "actions": "操作" },
+    "errors": {
+      "invalidPattern": "请输入可执行文件名称或前缀通配符；不允许单独使用 *。",
+      "addFailed": "添加命令权限失败。",
+      "updateFailed": "更新命令权限失败。",
+      "removeFailed": "删除命令权限失败。"
+    }
   },
   "agents": {
     "title": "已关联的 Agents",
     "emptyTitle": "暂无关联的 Agents",
     "emptyDescription": "将 Agents 关联到此工作站以允许它们执行命令。",
     "linkAgent": "关联 Agent",
+    "setDefault": "设为默认",
     "unlink": "取消关联",
     "linking": "关联中...",
     "unlinking": "取消关联中...",
@@ -118,7 +136,8 @@
       "actions": "操作"
     },
     "status": {
-      "linked": "已关联"
+      "linked": "已关联",
+      "default": "默认"
     },
     "linkDialog": {
       "title": "将 Agent 关联到工作站",

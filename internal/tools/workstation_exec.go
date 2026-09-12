@@ -180,7 +180,11 @@ func (t *WorkstationExecTool) Execute(ctx context.Context, args map[string]any) 
 			"agent_id", agentID,
 			"cmd_hash", fmt.Sprintf("%x", sha256.Sum256([]byte(cmd)))[:12],
 		)
-		return ErrorResult(i18n.T(locale, i18n.MsgWorkstationAccessDenied, agentID, ws.WorkstationKey))
+		// The workstation has already been resolved for this tenant. At this point a
+		// denial is the command allowlist (or environment policy), not an absent
+		// agent link. Returning the checker error gives the operator an actionable
+		// reason instead of incorrectly reporting that the agent is unlinked.
+		return ErrorResult(permErr.Error())
 	}
 
 	// 3. Get backend from cache.
@@ -246,8 +250,10 @@ func (t *WorkstationExecTool) resolveWorkstation(ctx context.Context, args map[s
 	tid := store.TenantIDFromContext(ctx)
 
 	if raw, ok := args["workstation_id"].(string); ok && raw != "" {
+		var ws *store.Workstation
+		var err error
 		if id, parseErr := uuid.Parse(raw); parseErr == nil {
-			ws, err := t.wsStore.GetByID(ctx, id)
+			ws, err = t.wsStore.GetByID(ctx, id)
 			if err != nil {
 				return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationNotFound, raw))
 			}
@@ -255,12 +261,15 @@ func (t *WorkstationExecTool) resolveWorkstation(ctx context.Context, args map[s
 			if ws.TenantID != tid {
 				return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationAccessDenied, agentUUID.String(), raw))
 			}
-			return ws, nil
+		} else {
+			// Treat as workstation_key; store impl already filters by tenant via ctx.
+			ws, err = t.wsStore.GetByKey(ctx, raw)
+			if err != nil {
+				return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationNotFound, raw))
+			}
 		}
-		// Treat as workstation_key; store impl already filters by tenant via ctx.
-		ws, err := t.wsStore.GetByKey(ctx, raw)
-		if err != nil {
-			return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationNotFound, raw))
+		if !t.isLinkedToAgent(ctx, agentUUID, ws.ID) {
+			return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationAccessDenied, agentUUID.String(), raw))
 		}
 		return ws, nil
 	}
@@ -304,6 +313,25 @@ func (t *WorkstationExecTool) resolveWorkstation(ctx context.Context, args map[s
 		return nil, errors.New(i18n.T(locale, i18n.MsgWorkstationAccessDenied, agentUUID.String(), chosen.WorkstationID.String()))
 	}
 	return ws, nil
+}
+
+// isLinkedToAgent verifies explicit workstation selection against the same
+// agent↔workstation grants used for default selection. Explicit IDs must not
+// bypass a grant simply because the workstation is in the same tenant.
+func (t *WorkstationExecTool) isLinkedToAgent(ctx context.Context, agentID, workstationID uuid.UUID) bool {
+	if agentID == uuid.Nil {
+		return false
+	}
+	links, err := t.linkStore.ListForAgent(ctx, agentID)
+	if err != nil {
+		return false
+	}
+	for _, link := range links {
+		if link.WorkstationID == workstationID {
+			return true
+		}
+	}
+	return false
 }
 
 // streamAndCollect reads stdout/stderr from stream, emits eventbus chunks, and waits for exit.

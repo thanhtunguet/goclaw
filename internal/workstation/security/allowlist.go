@@ -192,6 +192,11 @@ func isBlockedEnvKey(k string) bool {
 
 func validateLauncherArgs(binaryName string, args []string) string {
 	switch binaryName {
+	case "sh", "bash", "zsh", "fish", "dash", "ksh", "csh", "tcsh", "pwsh", "powershell":
+		// A shell turns a binary-only allowlist into arbitrary command execution.
+		// It is therefore never an executable permission, even if an old row was
+		// inserted manually before this validation existed.
+		return "shell command denied: " + binaryName
 	case "env", "nohup", "setsid", "timeout", "nice", "stdbuf", "xargs":
 		if len(args) > 0 {
 			return "launcher command with arguments denied: " + binaryName

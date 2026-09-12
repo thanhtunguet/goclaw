@@ -110,10 +110,27 @@ jobs:
           IMAGE="${DOCKERHUB_IMAGE}"
           echo "tags=${IMAGE}:latest,${IMAGE}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/web/pnpm-lock.yaml
+
+      - name: Build frontend dist
+        working-directory: ui/web
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm build
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ui/web
+          context: .
+          file: ui/web/Dockerfile
+          build-args: |
+            DIST_DIR=ui/web/dist
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.tags.outputs.tags }}

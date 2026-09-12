@@ -13,3 +13,9 @@ func TestValidateLauncherArgsAllowsPlainNonLauncherCommand(t *testing.T) {
 		t.Fatalf("expected git args to be allowed, got %q", reason)
 	}
 }
+
+func TestValidateLauncherArgsDeniesShell(t *testing.T) {
+	if reason := validateLauncherArgs("bash", []string{"-c", "id"}); reason == "" {
+		t.Fatal("expected shell to be denied even when allowlisted")
+	}
+}

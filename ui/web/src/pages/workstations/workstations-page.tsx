@@ -15,6 +15,7 @@ import { useWorkstations, type Workstation } from "./hooks/use-workstations";
 import { WorkstationCreateDialog } from "./workstation-create-dialog";
 import { WorkstationActivityTab } from "./workstation-activity-tab";
 import { WorkstationAgentsTab } from "./workstation-agents-tab";
+import { WorkstationPermissionsTab } from "./workstation-permissions-tab";
 
 export function WorkstationsPage() {
   const { t } = useTranslation("workstations");
@@ -121,11 +122,15 @@ export function WorkstationsPage() {
                           <td colSpan={7} className="px-4 py-4">
                             <Tabs defaultValue="agents">
                               <TabsList className="mb-3">
-                                <TabsTrigger value="agents">{t("tabs.agents")}</TabsTrigger>
-                                <TabsTrigger value="activity">{t("activity.title")}</TabsTrigger>
+                              <TabsTrigger value="agents">{t("tabs.agents")}</TabsTrigger>
+                              <TabsTrigger value="permissions">{t("tabs.permissions")}</TabsTrigger>
+                              <TabsTrigger value="activity">{t("activity.title")}</TabsTrigger>
                               </TabsList>
                               <TabsContent value="agents">
                                 <WorkstationAgentsTab workstationId={ws.id} />
+                              </TabsContent>
+                              <TabsContent value="permissions">
+                                <WorkstationPermissionsTab workstationId={ws.id} />
                               </TabsContent>
                               <TabsContent value="activity">
                                 <WorkstationActivityTab workstationId={ws.id} />

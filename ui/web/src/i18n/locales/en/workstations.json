@@ -101,13 +101,31 @@
   },
   "tabs": {
     "agents": "Agents",
+    "permissions": "Permissions",
     "activity": "Activity"
+  },
+  "permissions": {
+    "title": "Command permissions",
+    "description": "Allow executables by exact name or prefix wildcard (for example, git or python*). Shells and a lone * are never allowed.",
+    "patternLabel": "Executable name or prefix wildcard",
+    "patternPlaceholder": "e.g. npm or python*",
+    "add": "Allow command",
+    "remove": "Remove permission",
+    "empty": "No commands are allowed. Linked agents cannot execute commands until you add one.",
+    "columns": { "pattern": "Allowed executable", "enabled": "Enabled", "actions": "Actions" },
+    "errors": {
+      "invalidPattern": "Enter an executable name or a prefix wildcard; * by itself is not allowed.",
+      "addFailed": "Failed to add command permission.",
+      "updateFailed": "Failed to update command permission.",
+      "removeFailed": "Failed to remove command permission."
+    }
   },
   "agents": {
     "title": "Linked Agents",
     "emptyTitle": "No agents linked",
     "emptyDescription": "Link agents to this workstation to allow them to execute commands.",
     "linkAgent": "Link Agent",
+    "setDefault": "Set default",
     "unlink": "Unlink",
     "linking": "Linking...",
     "unlinking": "Unlinking...",
@@ -118,7 +136,8 @@
       "actions": "Actions"
     },
     "status": {
-      "linked": "Linked"
+      "linked": "Linked",
+      "default": "Default"
     },
     "linkDialog": {
       "title": "Link Agent to Workstation",
