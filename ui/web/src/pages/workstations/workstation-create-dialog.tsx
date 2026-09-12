@@ -109,16 +109,17 @@ export function WorkstationCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!submitting) { resetForm(); onOpenChange(v); } }}>
-      <DialogContent className="sm:max-w-lg">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
+      <DialogContent className="sm:max-w-lg sm:max-h-[90dvh] sm:flex sm:flex-col" style={{ padding: 0, gap: 0 }}>
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <DialogHeader className="flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
             <DialogTitle>{t("createDialog.title")}</DialogTitle>
             <DialogDescription>{t("createDialog.description")}</DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4 space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="ws-name">{t("createDialog.nameLabel")}</Label>
+          <div className="mt-4 flex-1 overflow-y-auto min-h-0">
+            <div className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+              <div className="space-y-1.5">
+                <Label htmlFor="ws-name">{t("createDialog.nameLabel")}</Label>
               <Input
                 id="ws-name"
                 value={name}
@@ -275,9 +276,10 @@ export function WorkstationCreateDialog({
             {fieldError && (
               <p className="text-sm text-destructive">{fieldError}</p>
             )}
+            </div>
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="flex-shrink-0 border-t px-4 py-4 sm:px-6">
             <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }} disabled={submitting}>
               {t("createDialog.cancel")}
             </Button>
