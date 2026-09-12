@@ -98,5 +98,38 @@
       "deny": "Denied"
     },
     "loadMore": "Load more"
+  },
+  "tabs": {
+    "agents": "Agents",
+    "activity": "Activity"
+  },
+  "agents": {
+    "title": "Linked Agents",
+    "emptyTitle": "No agents linked",
+    "emptyDescription": "Link agents to this workstation to allow them to execute commands.",
+    "linkAgent": "Link Agent",
+    "unlink": "Unlink",
+    "linking": "Linking...",
+    "unlinking": "Unlinking...",
+    "columns": {
+      "agent": "Agent",
+      "key": "Key",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "linked": "Linked"
+    },
+    "linkDialog": {
+      "title": "Link Agent to Workstation",
+      "description": "Select an agent to link to this workstation.",
+      "selectPlaceholder": "Select an agent...",
+      "confirm": "Link"
+    },
+    "unlinkDialog": {
+      "title": "Unlink Agent",
+      "description": "Are you sure you want to unlink this agent from the workstation?",
+      "confirm": "Unlink"
+    }
   }
 }

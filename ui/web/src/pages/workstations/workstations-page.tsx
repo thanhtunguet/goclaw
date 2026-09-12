@@ -14,6 +14,8 @@ import { formatDate } from "@/lib/format";
 import { useWorkstations, type Workstation } from "./hooks/use-workstations";
 import { WorkstationCreateDialog } from "./workstation-create-dialog";
 import { WorkstationActivityTab } from "./workstation-activity-tab";
+import { WorkstationAgentsTab } from "./workstation-agents-tab";
+import { WorkstationAgentsTab } from "./workstation-agents-tab";
 
 export function WorkstationsPage() {
   const { t } = useTranslation("workstations");
@@ -118,10 +120,14 @@ export function WorkstationsPage() {
                       {isExpanded && (
                         <tr key={`${ws.id}-detail`} className="bg-muted/10">
                           <td colSpan={7} className="px-4 py-4">
-                            <Tabs defaultValue="activity">
+                            <Tabs defaultValue="agents">
                               <TabsList className="mb-3">
+                                <TabsTrigger value="agents">{t("tabs.agents")}</TabsTrigger>
                                 <TabsTrigger value="activity">{t("activity.title")}</TabsTrigger>
                               </TabsList>
+                              <TabsContent value="agents">
+                                <WorkstationAgentsTab workstationId={ws.id} />
+                              </TabsContent>
                               <TabsContent value="activity">
                                 <WorkstationActivityTab workstationId={ws.id} />
                               </TabsContent>

@@ -98,5 +98,38 @@
       "deny": "拒绝"
     },
     "loadMore": "加载更多"
+  },
+  "tabs": {
+    "agents": "Agents",
+    "activity": "活动"
+  },
+  "agents": {
+    "title": "已关联的 Agents",
+    "emptyTitle": "暂无关联的 Agents",
+    "emptyDescription": "将 Agents 关联到此工作站以允许它们执行命令。",
+    "linkAgent": "关联 Agent",
+    "unlink": "取消关联",
+    "linking": "关联中...",
+    "unlinking": "取消关联中...",
+    "columns": {
+      "agent": "Agent",
+      "key": "键名",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "status": {
+      "linked": "已关联"
+    },
+    "linkDialog": {
+      "title": "将 Agent 关联到工作站",
+      "description": "选择一个 Agent 关联到此工作站。",
+      "selectPlaceholder": "选择 Agent...",
+      "confirm": "关联"
+    },
+    "unlinkDialog": {
+      "title": "取消关联 Agent",
+      "description": "确定要取消此 Agent 与工作站的关联吗？",
+      "confirm": "取消关联"
+    }
   }
 }
