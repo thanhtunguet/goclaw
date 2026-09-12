@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildWorkstationCreatePayload,
+  buildWorkstationUpdatePayload,
   type WorkstationCreateFormState,
 } from "../workstation-create-dialog-helpers";
 import type { Workstation } from "../hooks/use-workstations";
@@ -99,6 +100,43 @@ describe("workstation create payload contract", () => {
       kind: "error",
       errorKey: "keyRequired",
     });
+  });
+});
+
+describe("workstation update payload contract", () => {
+  it("builds the nested updates payload the gateway accepts and strips immutable fields", () => {
+    const result = buildWorkstationUpdatePayload({
+      id: "8f2b0f7e-1c4a-4c9e-9f1a-2b3c4d5e6f70",
+      key: "dev-server",
+      name: "Dev Server",
+      backend: "ssh",
+      host: "10.0.0.12",
+      port: "2222",
+      user: "ubuntu",
+      authMethod: "privateKey",
+      privateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nupdated\n-----END OPENSSH PRIVATE KEY-----",
+      password: "",
+      container: "",
+      image: "",
+      socketPath: "",
+      active: true,
+    });
+
+    expect(result).toEqual({
+      id: "8f2b0f7e-1c4a-4c9e-9f1a-2b3c4d5e6f70",
+      updates: {
+        name: "Dev Server",
+        active: true,
+        metadata: {
+          host: "10.0.0.12",
+          port: 2222,
+          user: "ubuntu",
+          privateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nupdated\n-----END OPENSSH PRIVATE KEY-----",
+        },
+      },
+    });
+    expect(result.updates).not.toHaveProperty("workstationKey");
+    expect(result.updates).not.toHaveProperty("backendType");
   });
 });
 

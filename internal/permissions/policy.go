@@ -477,6 +477,8 @@ func isReadMethod(method string) bool {
 		// Workstations read
 		protocol.MethodWorkstationsList,
 		protocol.MethodWorkstationsGet,
+		protocol.MethodWorkstationsListForAgent,
+		protocol.MethodWorkstationsListAgents,
 		protocol.MethodWorkstationsPermList,
 		protocol.MethodWorkstationsListActivity,
 	}

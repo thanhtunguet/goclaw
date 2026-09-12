@@ -24,6 +24,83 @@ export type BuildCreatePayloadResult =
   | { kind: "ok"; payload: CreateWorkstationParams }
   | { kind: "error"; errorKey: string };
 
+export interface WorkstationUpdatePayloadInput {
+  id: string;
+  key?: string;
+  name?: string;
+  backend?: WorkstationBackendType;
+  host?: string;
+  port?: string;
+  user?: string;
+  authMethod?: SshAuthMethod;
+  privateKey?: string;
+  password?: string;
+  container?: string;
+  image?: string;
+  socketPath?: string;
+  active?: boolean;
+}
+
+export function buildWorkstationUpdatePayload(
+  form: WorkstationUpdatePayloadInput,
+): { id: string; updates: Record<string, unknown> } {
+  const updates: Record<string, unknown> = {};
+
+  if (typeof form.name === "string") {
+    const nextName = form.name.trim();
+    if (nextName) updates.name = nextName;
+  }
+
+  if (typeof form.active === "boolean") {
+    updates.active = form.active;
+  }
+
+  const hasMetadataInputs =
+    typeof form.host === "string" ||
+    typeof form.port === "string" ||
+    typeof form.user === "string" ||
+    typeof form.privateKey === "string" ||
+    typeof form.password === "string" ||
+    typeof form.container === "string" ||
+    typeof form.image === "string" ||
+    typeof form.socketPath === "string";
+
+  if (hasMetadataInputs) {
+    let metadata: Record<string, unknown> = {};
+    const backend = form.backend ?? "ssh";
+
+    if (backend === "ssh") {
+      const host = (form.host ?? "").trim();
+      const user = (form.user ?? "").trim();
+      const port = Number.parseInt(form.port ?? "22", 10) || 22;
+      metadata = {
+        host,
+        port,
+        user,
+      };
+
+      const privateKey = (form.privateKey ?? "").trim();
+      if (privateKey) metadata.privateKey = privateKey;
+      const password = (form.password ?? "").trim();
+      if (password) metadata.password = password;
+    } else {
+      const container = (form.container ?? "").trim();
+      const image = (form.image ?? "").trim();
+      const socketPath = (form.socketPath ?? "").trim();
+
+      if (container) metadata.host = container;
+      if (image) metadata.image = image;
+      if (socketPath) metadata.socketPath = socketPath;
+    }
+
+    if (Object.keys(metadata).length > 0) {
+      updates.metadata = metadata;
+    }
+  }
+
+  return { id: form.id, updates };
+}
+
 /**
  * Builds the workstations.create RPC payload from dialog form state.
  *

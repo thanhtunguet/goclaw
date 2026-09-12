@@ -13,17 +13,21 @@ import { useDeferredLoading } from "@/hooks/use-deferred-loading";
 import { formatDate } from "@/lib/format";
 import { useWorkstations, type Workstation } from "./hooks/use-workstations";
 import { WorkstationCreateDialog } from "./workstation-create-dialog";
+import { WorkstationEditDialog } from "./workstation-edit-dialog";
 import { WorkstationActivityTab } from "./workstation-activity-tab";
+import { WorkstationAgentsTab } from "./workstation-agents-tab";
+import { WorkstationPermissionsTab } from "./workstation-permissions-tab";
 
 export function WorkstationsPage() {
   const { t } = useTranslation("workstations");
-  const { workstations, loading, refresh, createWorkstation, deleteWorkstation } = useWorkstations();
+  const { workstations, loading, refresh, createWorkstation, updateWorkstation, deleteWorkstation } = useWorkstations();
 
   const spinning = useMinLoading(loading);
   const isEmpty = workstations.length === 0;
   const showSkeleton = useDeferredLoading(loading && isEmpty);
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Workstation | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Workstation | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -104,24 +108,42 @@ export function WorkstationsPage() {
                           {formatDate(new Date(ws.createdAt))}
                         </td>
                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteTarget(ws)}
-                            className="gap-1"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            {t("actions.delete")}
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditTarget(ws)}
+                              className="gap-1"
+                            >
+                              {t("actions.edit")}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteTarget(ws)}
+                              className="gap-1"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              {t("actions.delete")}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                       {isExpanded && (
                         <tr key={`${ws.id}-detail`} className="bg-muted/10">
                           <td colSpan={7} className="px-4 py-4">
-                            <Tabs defaultValue="activity">
+                            <Tabs defaultValue="agents">
                               <TabsList className="mb-3">
-                                <TabsTrigger value="activity">{t("activity.title")}</TabsTrigger>
+                              <TabsTrigger value="agents">{t("tabs.agents")}</TabsTrigger>
+                              <TabsTrigger value="permissions">{t("tabs.permissions")}</TabsTrigger>
+                              <TabsTrigger value="activity">{t("activity.title")}</TabsTrigger>
                               </TabsList>
+                              <TabsContent value="agents">
+                                <WorkstationAgentsTab workstationId={ws.id} />
+                              </TabsContent>
+                              <TabsContent value="permissions">
+                                <WorkstationPermissionsTab workstationId={ws.id} />
+                              </TabsContent>
                               <TabsContent value="activity">
                                 <WorkstationActivityTab workstationId={ws.id} />
                               </TabsContent>
@@ -143,6 +165,18 @@ export function WorkstationsPage() {
         onOpenChange={setCreateOpen}
         onCreate={async (params) => {
           await createWorkstation(params);
+        }}
+      />
+
+      <WorkstationEditDialog
+        open={Boolean(editTarget)}
+        workstation={editTarget}
+        onOpenChange={(next) => {
+          if (!next) setEditTarget(null);
+        }}
+        onSave={async (id, params) => {
+          await updateWorkstation(id, params);
+          setEditTarget(null);
         }}
       />
 

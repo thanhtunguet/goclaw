@@ -33,6 +33,9 @@ func builtinToolSeedData() []store.BuiltinToolDef {
 		{Name: "claude_remote", DisplayName: "Claude Remote", Description: "Run Claude Code CLI on a remote workstation via workstation_exec", Category: "runtime", Enabled: true,
 			Requires: []string{"workstation"},
 		},
+		{Name: "workstation_list", DisplayName: "Workstation List", Description: "List the remote workstations linked to the current agent, including their default binding, backend type, and sanitized connection metadata", Category: "runtime", Enabled: true,
+			Requires: []string{"workstation"},
+		},
 
 		// web
 		{Name: "web_search", DisplayName: "Web Search", Description: "Search the web for information using a search engine (Brave or DuckDuckGo)", Category: "web", Enabled: true,
