@@ -8,11 +8,11 @@ RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 WORKDIR /app
 
 # Cache dependencies
-COPY package.json pnpm-lock.yaml ./
+COPY ui/web/package.json ui/web/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source and build
-COPY . .
+COPY ui/web/ .
 RUN pnpm build
 
 # ── Stage 2: Serve ──
@@ -23,7 +23,7 @@ FROM nginx:1.27-alpine
 COPY --chmod=0755 --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ui/web/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
