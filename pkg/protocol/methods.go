@@ -225,6 +225,7 @@ const (
 	MethodWorkstationsTest        = "workstations.testConnection"
 	MethodWorkstationsLinkAgent   = "workstations.linkAgent"
 	MethodWorkstationsUnlinkAgent = "workstations.unlinkAgent"
+	MethodWorkstationsListAgents  = "workstations.listAgents"
 
 	// Workstation permission allowlist CRUD (Phase 6)
 	MethodWorkstationsPermList   = "workstations.permissions.list"

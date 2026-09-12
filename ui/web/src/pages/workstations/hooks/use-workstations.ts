@@ -86,6 +86,27 @@ export function useWorkstations() {
     [ws, load],
   );
 
+  const linkAgent = useCallback(
+    async (workstationId: string, agentId: string, isDefault = false): Promise<void> => {
+      await ws.call(Methods.WORKSTATIONS_LINK_AGENT, {
+        workstationId,
+        agentId,
+        isDefault,
+      });
+    },
+    [ws],
+  );
+
+  const unlinkAgent = useCallback(
+    async (workstationId: string, agentId: string): Promise<void> => {
+      await ws.call(Methods.WORKSTATIONS_UNLINK_AGENT, {
+        workstationId,
+        agentId,
+      });
+    },
+    [ws],
+  );
+
   return {
     workstations,
     loading,
@@ -94,5 +115,7 @@ export function useWorkstations() {
     createWorkstation,
     updateWorkstation,
     deleteWorkstation,
+    linkAgent,
+    unlinkAgent,
   };
 }

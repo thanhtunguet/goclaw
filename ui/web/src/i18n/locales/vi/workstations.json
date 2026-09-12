@@ -98,5 +98,38 @@
       "deny": "Từ chối"
     },
     "loadMore": "Tải thêm"
+  },
+  "tabs": {
+    "agents": "Agents",
+    "activity": "Hoạt động"
+  },
+  "agents": {
+    "title": "Agents đã liên kết",
+    "emptyTitle": "Chưa có agent nào được liên kết",
+    "emptyDescription": "Liên kết agents với workstation này để cho phép chúng thực thi lệnh.",
+    "linkAgent": "Liên kết Agent",
+    "unlink": "Hủy liên kết",
+    "linking": "Đang liên kết...",
+    "unlinking": "Đang hủy liên kết...",
+    "columns": {
+      "agent": "Agent",
+      "key": "Khóa",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "status": {
+      "linked": "Đã liên kết"
+    },
+    "linkDialog": {
+      "title": "Liên kết Agent với Workstation",
+      "description": "Chọn một agent để liên kết với workstation này.",
+      "selectPlaceholder": "Chọn agent...",
+      "confirm": "Liên kết"
+    },
+    "unlinkDialog": {
+      "title": "Hủy liên kết Agent",
+      "description": "Bạn có chắc muốn hủy liên kết agent này khỏi workstation?",
+      "confirm": "Hủy liên kết"
+    }
   }
 }
