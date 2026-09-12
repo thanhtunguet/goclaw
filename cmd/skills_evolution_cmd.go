@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 )
@@ -210,13 +209,4 @@ func num(v any) float64 {
 	default:
 		return 0
 	}
-}
-
-func printSuggestionTable(items []map[string]any) {
-	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tSTATUS\tTYPE\tREASON")
-	for _, item := range items {
-		fmt.Fprintf(tw, "%v\t%v\t%v\t%v\n", item["id"], item["status"], item["suggestion_type"], item["reason"])
-	}
-	tw.Flush()
 }

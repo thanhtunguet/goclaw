@@ -447,7 +447,7 @@ func processNormalMessage(
 		ctx = store.WithTenantID(ctx, msg.TenantID)
 	}
 
-	gate := applyTeamWorkGateForInbound(ctx, deps, msg, sessionKey, agentID, peerKind, agentLoop.UUID(), skillFilter, agentLoop.Provider(), agentLoop.Model())
+	gate := applyTeamWorkGateForInbound(ctx, deps, msg, sessionKey, agentID, agentLoop.UUID(), skillFilter, agentLoop.Provider(), agentLoop.Model())
 	inboundMessage = gate.Message
 
 	// Inject post-turn dispatch tracker so team task creates are deferred.

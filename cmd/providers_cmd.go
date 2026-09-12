@@ -24,16 +24,6 @@ func providersCmd() *cobra.Command {
 	return cmd
 }
 
-// httpProviderFull is a detailed provider representation from the HTTP API.
-type httpProviderFull struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	ProviderType string `json:"provider_type"`
-	BaseURL      string `json:"base_url"`
-	Enabled      bool   `json:"enabled"`
-	HasAPIKey    bool   `json:"has_api_key"`
-}
-
 func providersListCmd() *cobra.Command {
 	var jsonOutput bool
 	var showModels bool

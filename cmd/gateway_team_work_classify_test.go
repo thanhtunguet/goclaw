@@ -48,7 +48,7 @@ func TestApplyTeamWorkGateForInboundSkipsAgentWithoutTeamOrDelegateLink(t *testi
 	}, bus.InboundMessage{
 		Content:  "lập kế hoạch content và chiến lược cho chiến dịch mới",
 		Metadata: map[string]string{},
-	}, "session:test", "bao-an", "direct", uuid.New(), nil, provider, "test-model")
+	}, "session:test", "bao-an", uuid.New(), nil, provider, "test-model")
 
 	if out.Message != "lập kế hoạch content và chiến lược cho chiến dịch mới" {
 		t.Fatalf("Message = %q, want original message", out.Message)

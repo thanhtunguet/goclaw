@@ -302,7 +302,6 @@ func wireTracingAndCron(
 	cfg *config.Config,
 	stores *store.Stores,
 	msgBus *bus.MessageBus,
-	dataDir string,
 ) (*tracing.Collector, *tracing.SnapshotWorker) {
 	var traceCollector *tracing.Collector
 	if stores.Tracing != nil {
@@ -554,7 +553,6 @@ func loadBootstrapFiles(
 // setupSkillsSystem creates the skills loader, registers skill tools, wires skills-store,
 // seeds bundled skills, and enables embedding-based skill search.
 func setupSkillsSystem(
-	cfg *config.Config,
 	workspace string,
 	dataDir string,
 	pgStores *store.Stores,

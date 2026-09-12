@@ -83,6 +83,6 @@ func setupStoresAndTracing(
 		os.Exit(1)
 	}
 
-	traceCollector, snapshotWorker := wireTracingAndCron(cfg, stores, msgBus, dataDir)
+	traceCollector, snapshotWorker := wireTracingAndCron(cfg, stores, msgBus)
 	return stores, traceCollector, snapshotWorker
 }

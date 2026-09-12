@@ -12,7 +12,6 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/agent"
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
 	orch "github.com/nextlevelbuilder/goclaw/internal/orchestration"
 	"github.com/nextlevelbuilder/goclaw/internal/scheduler"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
@@ -71,7 +70,6 @@ func processAnnounceLoop(
 	msgBus *bus.MessageBus,
 	teamStore store.TeamStore,
 	postTurn tools.PostTurnProcessor,
-	cfg *config.Config,
 	channelMgr *channels.Manager,
 ) {
 	for {
@@ -129,7 +127,7 @@ func processAnnounceLoop(
 		}
 		// WS channel has no outbound media handler — deliver via ContentSuffix.
 		if r.OrigChannel == "ws" && len(req.ForwardMedia) > 0 {
-			req.ContentSuffix = mediaToMarkdownFromPaths(req.ForwardMedia, cfg)
+			req.ContentSuffix = mediaToMarkdownFromPaths(req.ForwardMedia)
 			req.ForwardMedia = nil
 		}
 

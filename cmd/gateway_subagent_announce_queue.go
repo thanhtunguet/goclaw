@@ -12,7 +12,6 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/agent"
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
 	orch "github.com/nextlevelbuilder/goclaw/internal/orchestration"
 	"github.com/nextlevelbuilder/goclaw/internal/scheduler"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
@@ -157,7 +156,6 @@ func processSubagentAnnounceLoop(
 	subagentMgr *tools.SubagentManager,
 	sched *scheduler.Scheduler,
 	msgBus *bus.MessageBus,
-	cfg *config.Config,
 	channelMgr *channels.Manager,
 ) {
 	// Ensure tenant scope is always set for the scheduler.
@@ -196,7 +194,7 @@ func processSubagentAnnounceLoop(
 		}
 		contentSuffix := ""
 		if r.OrigChannel == "ws" && len(fwdMedia) > 0 {
-			contentSuffix = mediaToMarkdownFromPaths(fwdMedia, cfg)
+			contentSuffix = mediaToMarkdownFromPaths(fwdMedia)
 			fwdMedia = nil
 		}
 

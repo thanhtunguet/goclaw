@@ -51,9 +51,6 @@ func promptPassword(title, description string) (string, error) {
 	return value, nil
 }
 
-// filterThreshold: enable type-to-filter only when there are more than this many options.
-const filterThreshold = 5
-
 const scrollableThreshold = 15 // enable scrollbars when there are more than this many options
 
 // promptSelect shows a single-select list using huh TUI.
@@ -84,44 +81,6 @@ func promptSelect[T comparable](title string, options []SelectOption[T], default
 		return zero, err
 	}
 	return value, nil
-}
-
-// promptMultiSelect shows a multi-select list using huh TUI.
-// Returns the values of all selected options.
-func promptMultiSelect[T comparable](title, description string, options []SelectOption[T], preselected []T) ([]T, error) {
-	var values []T
-
-	// Build pre-selected set for fast lookup
-	preSet := make(map[T]bool, len(preselected))
-	for _, v := range preselected {
-		preSet[v] = true
-	}
-
-	huhOpts := make([]huh.Option[T], len(options))
-	for i, opt := range options {
-		o := huh.NewOption(opt.Label, opt.Value)
-		if preSet[opt.Value] {
-			o = o.Selected(true)
-		}
-		huhOpts[i] = o
-	}
-
-	ms := huh.NewMultiSelect[T]().
-		Title(title).
-		Options(huhOpts...).
-		Value(&values)
-
-	if description != "" {
-		ms = ms.Description(description)
-	}
-	if len(options) > filterThreshold {
-		ms = ms.Filtering(true)
-	}
-
-	if err := runWithHelp(ms); err != nil {
-		return nil, err
-	}
-	return values, nil
 }
 
 // promptConfirm asks a yes/no question using huh TUI. Returns true for yes.

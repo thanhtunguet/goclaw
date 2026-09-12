@@ -15,7 +15,6 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/media"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
 	"github.com/nextlevelbuilder/goclaw/internal/store/pg"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
 	"github.com/nextlevelbuilder/goclaw/internal/webhooks"
 )
 
@@ -42,7 +41,6 @@ func (d *gatewayDeps) wireHTTPHandlersOnServer(
 	h httpHandlers,
 	wakeH *httpapi.WakeHandler,
 	mcpPool *mcpbridge.Pool,
-	postTurn tools.PostTurnProcessor,
 	mediaStore *media.Store,
 ) {
 	if h.providers != nil {

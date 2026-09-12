@@ -18,7 +18,7 @@ import (
 // skips WithSenderID and the Lead's resume has empty sender attribution.
 func TestAnnounceRouting_PropagatesSenderAndRole(t *testing.T) {
 	const (
-		realSender = "5218954741"   // Telegram numeric user id
+		realSender = "5218954741" // Telegram numeric user id
 		realRole   = "admin"
 		realUserID = "group:telegram:-1003812294018"
 	)
@@ -49,6 +49,9 @@ func TestAnnounceRouting_PropagatesSenderAndRole(t *testing.T) {
 	if r.OriginUserID != realUserID {
 		t.Fatalf("OriginUserID = %q, want %q", r.OriginUserID, realUserID)
 	}
+	if r.TeamID != inMeta[tools.MetaTeamID] {
+		t.Fatalf("TeamID = %q, want %q", r.TeamID, inMeta[tools.MetaTeamID])
+	}
 }
 
 // TestAnnounceRouting_EmptyMetaPropagatesEmpty asserts the wire-through is
@@ -70,5 +73,8 @@ func TestAnnounceRouting_EmptyMetaPropagatesEmpty(t *testing.T) {
 	}
 	if r.OriginRole != "" {
 		t.Errorf("OriginRole = %q, want empty", r.OriginRole)
+	}
+	if r.OriginUserID != "" {
+		t.Errorf("OriginUserID = %q, want empty", r.OriginUserID)
 	}
 }

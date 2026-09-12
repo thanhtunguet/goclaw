@@ -151,7 +151,7 @@ func handleSubagentAnnounce(
 				TenantID: msg.TenantID, RootAgentID: rootAgentID, RootAgentKey: parentAgent,
 			})
 
-			processSubagentAnnounceLoop(ctx, routing, roster, deps.SubagentMgr, deps.Sched, deps.MsgBus, deps.Cfg, deps.ChannelMgr)
+			processSubagentAnnounceLoop(ctx, routing, roster, deps.SubagentMgr, deps.Sched, deps.MsgBus, deps.ChannelMgr)
 		})
 	}
 
@@ -264,18 +264,18 @@ func handleTeammateMessage(
 	schedCtx := tools.WithTaskActionFlags(ctx, taskActionFlags)
 
 	outCh := deps.Sched.Schedule(schedCtx, scheduler.LaneTeam, agent.RunRequest{
-		SessionKey:      sessionKey,
-		Message:         msg.Content,
-		Channel:         origChannel,
-		ChannelType:     origChannelType,
-		ChatID:          origChatID,
-		ChatTitle:       resolveGroupDisplayTitle(schedCtx, deps.ChannelMgr, origChannel, origChatID, origPeerKind, ""),
-		PeerKind:        origPeerKind,
-		LocalKey:        origLocalKey,
-		UserID:          announceUserID,
-		SenderID:        teammateSenderID, // real user who triggered the teammate dispatch (#915)
-		Role:            teammateRole,     // RBAC role for admin bypass during teammate turn (#915)
-		RunID:           fmt.Sprintf("teammate-%s-%s", msg.Metadata[tools.MetaFromAgent], msg.Metadata[tools.MetaToAgent]),
+		SessionKey:  sessionKey,
+		Message:     msg.Content,
+		Channel:     origChannel,
+		ChannelType: origChannelType,
+		ChatID:      origChatID,
+		ChatTitle:   resolveGroupDisplayTitle(schedCtx, deps.ChannelMgr, origChannel, origChatID, origPeerKind, ""),
+		PeerKind:    origPeerKind,
+		LocalKey:    origLocalKey,
+		UserID:      announceUserID,
+		SenderID:    teammateSenderID, // real user who triggered the teammate dispatch (#915)
+		Role:        teammateRole,     // RBAC role for admin bypass during teammate turn (#915)
+		RunID:       fmt.Sprintf("teammate-%s-%s", msg.Metadata[tools.MetaFromAgent], msg.Metadata[tools.MetaToAgent]),
 		// Streamed for connection liveness, not for delivery. A teammate run is
 		// never registered with the channel manager, so HandleAgentEvent drops its
 		// chunks on the first line and nothing is delivered incrementally; the task
@@ -417,7 +417,7 @@ func handleTeammateMessage(
 			ParentRootSpanID: parentRootSpanID,
 			OutMeta:          outMeta,
 		}
-		processAnnounceLoop(ctx, routing, deps.Sched, deps.MsgBus, deps.TeamStore, deps.PostTurn, deps.Cfg, deps.ChannelMgr)
+		processAnnounceLoop(ctx, routing, deps.Sched, deps.MsgBus, deps.TeamStore, deps.PostTurn, deps.ChannelMgr)
 	}(origChannel, origChatID, msg.SenderID, taskIDStr, outMeta, msg.Metadata)
 
 	return true

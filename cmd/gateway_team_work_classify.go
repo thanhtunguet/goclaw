@@ -17,7 +17,7 @@ type teamWorkGateOutcome struct {
 	Directive *agent.TeamWorkDirective
 }
 
-func applyTeamWorkGateForInbound(ctx context.Context, deps *ConsumerDeps, msg bus.InboundMessage, sessionKey, agentKey, peerKind string, agentUUID uuid.UUID, skillFilter []string, provider providers.Provider, model string) teamWorkGateOutcome {
+func applyTeamWorkGateForInbound(ctx context.Context, deps *ConsumerDeps, msg bus.InboundMessage, sessionKey, agentKey string, agentUUID uuid.UUID, skillFilter []string, provider providers.Provider, model string) teamWorkGateOutcome {
 	out := teamWorkGateOutcome{Message: msg.Content}
 	if deps == nil || deps.Cfg == nil || deps.Cfg.Gateway.TeamWorkClassify == nil || !*deps.Cfg.Gateway.TeamWorkClassify {
 		return out

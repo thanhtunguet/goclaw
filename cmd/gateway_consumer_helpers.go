@@ -18,19 +18,6 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/tools"
 )
 
-// resolveAgentRoute determines which agent should handle a message
-// based on config bindings. Priority: peer → channel → default.
-// Matching TS resolve-route.ts binding resolution.
-func resolveAgentRoute(cfg *config.Config, channel, chatID, peerKind string) string {
-	for _, binding := range cfg.Bindings {
-		if bindingMatchesInbound(binding, channel, chatID, peerKind) {
-			return config.NormalizeAgentID(binding.AgentID)
-		}
-	}
-
-	return cfg.ResolveDefaultAgentID()
-}
-
 type defaultAgentGetter interface {
 	GetDefault(ctx context.Context) (*store.AgentData, error)
 }
@@ -185,7 +172,7 @@ func buildAnnounceOutMeta(localKey string) map[string]string {
 // Uses absolute file paths with the /v1/files endpoint (auth-token protected).
 // Generates relative URLs (/v1/files/...) so they work regardless of the server's
 // external hostname — the browser resolves them from the current origin.
-func mediaToMarkdown(media []agent.MediaResult, cfg *config.Config) string {
+func mediaToMarkdown(media []agent.MediaResult) string {
 	if len(media) == 0 {
 		return ""
 	}
@@ -221,7 +208,7 @@ func mediaToMarkdown(media []agent.MediaResult, cfg *config.Config) string {
 
 // mediaToMarkdownFromPaths is like mediaToMarkdown but accepts raw file paths
 // ([]string from bus.InboundMessage.Media) instead of []agent.MediaResult.
-func mediaToMarkdownFromPaths(files []bus.MediaFile, cfg *config.Config) string {
+func mediaToMarkdownFromPaths(files []bus.MediaFile) string {
 	if len(files) == 0 {
 		return ""
 	}
@@ -239,7 +226,7 @@ func mediaToMarkdownFromPaths(files []bus.MediaFile, cfg *config.Config) string 
 			ContentType: ct,
 		})
 	}
-	return mediaToMarkdown(media, cfg)
+	return mediaToMarkdown(media)
 }
 
 // resolveChannelType returns the platform type for a channel instance name.
