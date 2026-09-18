@@ -106,6 +106,85 @@ func (s *SQLiteWorkstationPermissionStore) SetEnabled(ctx context.Context, id uu
 	return err
 }
 
+// AddBatch inserts multiple allowlist entries in a single transaction.
+func (s *SQLiteWorkstationPermissionStore) AddBatch(ctx context.Context, perms []store.WorkstationPermission) (int, error) {
+	if len(perms) == 0 {
+		return 0, nil
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return 0, fmt.Errorf("tenant_id required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("workstation_permissions add batch begin tx: %w", err)
+	}
+	defer tx.Rollback()
+	count := 0
+	for i := range perms {
+		p := &perms[i]
+		if p.ID == uuid.Nil {
+			p.ID = store.GenNewID()
+		}
+		p.TenantID = tid
+		if p.CreatedAt.IsZero() {
+			p.CreatedAt = time.Now()
+		}
+		enabledInt := 0
+		if p.Enabled {
+			enabledInt = 1
+		}
+		res, err := tx.ExecContext(ctx,
+			`INSERT OR IGNORE INTO workstation_permissions
+			 (id, workstation_id, tenant_id, pattern, enabled, created_by, created_at)
+			 VALUES (?,?,?,?,?,?,?)`,
+			p.ID.String(), p.WorkstationID.String(), tid.String(),
+			p.Pattern, enabledInt, p.CreatedBy,
+			p.CreatedAt.Format("2006-01-02T15:04:05.000Z"),
+		)
+		if err != nil {
+			return 0, fmt.Errorf("workstation_permissions add batch item %d: %w", i, err)
+		}
+		n, _ := res.RowsAffected()
+		count += int(n)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("workstation_permissions add batch commit: %w", err)
+	}
+	return count, nil
+}
+
+// RemoveBatch deletes multiple allowlist entries by ID in a single transaction.
+func (s *SQLiteWorkstationPermissionStore) RemoveBatch(ctx context.Context, ids []uuid.UUID) (int, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return 0, fmt.Errorf("tenant_id required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("workstation_permissions remove batch begin tx: %w", err)
+	}
+	defer tx.Rollback()
+	count := 0
+	for _, id := range ids {
+		res, err := tx.ExecContext(ctx,
+			`DELETE FROM workstation_permissions WHERE id = ? AND tenant_id = ?`,
+			id.String(), tid.String())
+		if err != nil {
+			return 0, fmt.Errorf("workstation_permissions remove batch item: %w", err)
+		}
+		n, _ := res.RowsAffected()
+		count += int(n)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("workstation_permissions remove batch commit: %w", err)
+	}
+	return count, nil
+}
+
 // SeedDefaults inserts default safe binary names for a new workstation.
 // Uses INSERT OR IGNORE — safe to call multiple times.
 // Must be called inside the same transaction as workstation creation (H5 fix).

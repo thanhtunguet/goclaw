@@ -43,6 +43,14 @@ type WorkstationPermissionStore interface {
 	// Uses INSERT OR IGNORE / ON CONFLICT DO NOTHING — safe to call multiple times.
 	// Intended to be called inside the workstation Create transaction (H5 fix).
 	SeedDefaults(ctx context.Context, workstationID, tenantID uuid.UUID) error
+
+	// AddBatch inserts multiple allowlist entries in a single transaction.
+	// Returns the number of entries successfully added.
+	AddBatch(ctx context.Context, perms []WorkstationPermission) (int, error)
+
+	// RemoveBatch deletes multiple allowlist entries by ID in a single transaction.
+	// Returns the number of entries successfully removed.
+	RemoveBatch(ctx context.Context, ids []uuid.UUID) (int, error)
 }
 
 // DefaultAllowedBinaries is the set of binary names seeded when a workstation is created.

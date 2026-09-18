@@ -62,7 +62,9 @@ func (m *WorkstationsMethods) Register(router *gateway.MethodRouter) {
 	// Phase 6: permission allowlist CRUD
 	router.Register(protocol.MethodWorkstationsPermList, m.adminOnly(m.handlePermList))
 	router.Register(protocol.MethodWorkstationsPermAdd, m.adminOnly(m.handlePermAdd))
+	router.Register(protocol.MethodWorkstationsPermAddBulk, m.adminOnly(m.handlePermAddBulk))
 	router.Register(protocol.MethodWorkstationsPermRemove, m.adminOnly(m.handlePermRemove))
+	router.Register(protocol.MethodWorkstationsPermRemoveBulk, m.adminOnly(m.handlePermRemoveBulk))
 	router.Register(protocol.MethodWorkstationsPermToggle, m.adminOnly(m.handlePermToggle))
 	// Phase 7: activity audit log
 	router.Register(protocol.MethodWorkstationsListActivity, m.adminOnly(m.handleListActivity))
@@ -660,6 +662,101 @@ func (m *WorkstationsMethods) handlePermToggle(ctx context.Context, client *gate
 		return
 	}
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"id": id, "enabled": params.Enabled}))
+}
+
+func (m *WorkstationsMethods) handlePermAddBulk(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+	locale := store.LocaleFromContext(ctx)
+	if !m.requirePermStore(locale, client, req) {
+		return
+	}
+	var params struct {
+		WorkstationID string   `json:"workstationId"`
+		Patterns      []string `json:"patterns"`
+	}
+	if req.Params != nil {
+		if err := json.Unmarshal(req.Params, &params); err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "invalid params"))
+			return
+		}
+	}
+	wsID, err := uuid.Parse(params.WorkstationID)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgInvalidID, "workstation")))
+		return
+	}
+	if _, err := m.wsStore.GetByID(ctx, wsID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound,
+				i18n.T(locale, i18n.MsgWorkstationNotFound, params.WorkstationID)))
+			return
+		}
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgInternalError, err.Error())))
+		return
+	}
+	if len(params.Patterns) == 0 {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgRequired, "patterns")))
+		return
+	}
+	perms := make([]store.WorkstationPermission, 0, len(params.Patterns))
+	for _, pattern := range params.Patterns {
+		if pattern == "" {
+			continue
+		}
+		perms = append(perms, store.WorkstationPermission{
+			WorkstationID: wsID,
+			Pattern:       pattern,
+			Enabled:       true,
+			CreatedBy:     client.UserID(),
+		})
+	}
+	count, err := m.permStore.AddBatch(ctx, perms)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToCreate, "permissions", err.Error())))
+		return
+	}
+	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"count": count}))
+}
+
+func (m *WorkstationsMethods) handlePermRemoveBulk(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+	locale := store.LocaleFromContext(ctx)
+	if !m.requirePermStore(locale, client, req) {
+		return
+	}
+	var params struct {
+		IDs []string `json:"ids"`
+	}
+	if req.Params != nil {
+		if err := json.Unmarshal(req.Params, &params); err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "invalid params"))
+			return
+		}
+	}
+	if len(params.IDs) == 0 {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgRequired, "ids")))
+		return
+	}
+	ids := make([]uuid.UUID, 0, len(params.IDs))
+	for _, idStr := range params.IDs {
+		id, err := uuid.Parse(idStr)
+		if err != nil {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest,
+				i18n.T(locale, i18n.MsgInvalidID, "permission")))
+			return
+		}
+		ids = append(ids, id)
+	}
+	count, err := m.permStore.RemoveBatch(ctx, ids)
+	if err != nil {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToDelete, "permissions", err.Error())))
+		return
+	}
+	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{"count": count}))
 }
 
 // --- Phase 7: activity audit log ---

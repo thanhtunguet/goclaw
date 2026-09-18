@@ -229,10 +229,12 @@ const (
 	MethodWorkstationsListAgents   = "workstations.listAgents"
 
 	// Workstation permission allowlist CRUD (Phase 6)
-	MethodWorkstationsPermList   = "workstations.permissions.list"
-	MethodWorkstationsPermAdd    = "workstations.permissions.add"
-	MethodWorkstationsPermRemove = "workstations.permissions.remove"
-	MethodWorkstationsPermToggle = "workstations.permissions.toggle"
+	MethodWorkstationsPermList       = "workstations.permissions.list"
+	MethodWorkstationsPermAdd        = "workstations.permissions.add"
+	MethodWorkstationsPermAddBulk    = "workstations.permissions.addBulk"
+	MethodWorkstationsPermRemove     = "workstations.permissions.remove"
+	MethodWorkstationsPermRemoveBulk = "workstations.permissions.removeBulk"
+	MethodWorkstationsPermToggle     = "workstations.permissions.toggle"
 
 	// Workstation activity audit log (Phase 7)
 	MethodWorkstationsListActivity = "workstations.activity.list"

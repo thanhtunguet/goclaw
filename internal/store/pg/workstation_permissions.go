@@ -97,6 +97,79 @@ func (s *PGWorkstationPermissionStore) SetEnabled(ctx context.Context, id uuid.U
 // SeedDefaults inserts default safe binary names for a new workstation.
 // Must be called inside the same transaction as workstation creation (H5 fix).
 // Uses ON CONFLICT DO NOTHING — safe to call multiple times.
+// AddBatch inserts multiple allowlist entries in a single transaction.
+func (s *PGWorkstationPermissionStore) AddBatch(ctx context.Context, perms []store.WorkstationPermission) (int, error) {
+	if len(perms) == 0 {
+		return 0, nil
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return 0, fmt.Errorf("tenant_id required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("workstation_permissions add batch begin tx: %w", err)
+	}
+	defer tx.Rollback()
+	count := 0
+	for i := range perms {
+		p := &perms[i]
+		if p.ID == uuid.Nil {
+			p.ID = store.GenNewID()
+		}
+		p.TenantID = tid
+		if p.CreatedAt.IsZero() {
+			p.CreatedAt = time.Now()
+		}
+		res, err := tx.ExecContext(ctx,
+			`INSERT INTO workstation_permissions
+			 (id, workstation_id, tenant_id, pattern, enabled, created_by, created_at)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7)
+			 ON CONFLICT (workstation_id, pattern) DO NOTHING`,
+			p.ID, p.WorkstationID, tid, p.Pattern, p.Enabled, p.CreatedBy, p.CreatedAt,
+		)
+		if err != nil {
+			return 0, fmt.Errorf("workstation_permissions add batch item %d: %w", i, err)
+		}
+		n, _ := res.RowsAffected()
+		count += int(n)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("workstation_permissions add batch commit: %w", err)
+	}
+	return count, nil
+}
+
+// RemoveBatch deletes multiple allowlist entries by ID in a single transaction.
+func (s *PGWorkstationPermissionStore) RemoveBatch(ctx context.Context, ids []uuid.UUID) (int, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return 0, fmt.Errorf("tenant_id required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("workstation_permissions remove batch begin tx: %w", err)
+	}
+	defer tx.Rollback()
+	count := 0
+	for _, id := range ids {
+		res, err := tx.ExecContext(ctx,
+			`DELETE FROM workstation_permissions WHERE id = $1 AND tenant_id = $2`, id, tid)
+		if err != nil {
+			return 0, fmt.Errorf("workstation_permissions remove batch item: %w", err)
+		}
+		n, _ := res.RowsAffected()
+		count += int(n)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("workstation_permissions remove batch commit: %w", err)
+	}
+	return count, nil
+}
+
 func (s *PGWorkstationPermissionStore) SeedDefaults(ctx context.Context, workstationID, tenantID uuid.UUID) error {
 	for _, pattern := range store.DefaultAllowedBinaries {
 		_, err := s.db.ExecContext(ctx,

@@ -22,8 +22,8 @@ type WorkstationsHandler struct {
 	wsStore       store.WorkstationStore
 	linkStore     store.AgentWorkstationLinkStore
 	tenantStore   store.TenantStore
-	permStore     store.WorkstationPermissionStore     // Phase 6; may be nil
-	activityStore store.WorkstationActivityStore       // Phase 7; may be nil
+	permStore     store.WorkstationPermissionStore // Phase 6; may be nil
+	activityStore store.WorkstationActivityStore   // Phase 7; may be nil
 }
 
 // NewWorkstationsHandler creates a WorkstationsHandler.
@@ -57,7 +57,9 @@ func (h *WorkstationsHandler) RegisterRoutes(mux *http.ServeMux) {
 	// Phase 6: permission allowlist CRUD
 	mux.HandleFunc("GET /v1/workstations/{id}/permissions", h.auth(h.handlePermList))
 	mux.HandleFunc("POST /v1/workstations/{id}/permissions", h.auth(h.handlePermAdd))
+	mux.HandleFunc("POST /v1/workstations/{id}/permissions/bulk", h.auth(h.handlePermAddBulk))
 	mux.HandleFunc("DELETE /v1/workstations/{id}/permissions/{permId}", h.auth(h.handlePermRemove))
+	mux.HandleFunc("DELETE /v1/workstations/{id}/permissions/bulk", h.auth(h.handlePermRemoveBulk))
 	mux.HandleFunc("PUT /v1/workstations/{id}/permissions/{permId}/toggle", h.auth(h.handlePermToggle))
 	// Phase 7: activity audit log
 	mux.HandleFunc("GET /v1/workstations/{id}/activity", h.auth(h.handleActivityList))
@@ -383,6 +385,97 @@ func (h *WorkstationsHandler) handlePermRemove(w http.ResponseWriter, r *http.Re
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"id": permID})
+}
+
+func (h *WorkstationsHandler) handlePermAddBulk(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	locale := store.LocaleFromContext(ctx)
+	if !requireTenantAdmin(w, r, h.tenantStore) || !h.requirePermStore(w, locale) {
+		return
+	}
+	wsID, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgInvalidID, "workstation"))
+		return
+	}
+	if _, err := h.wsStore.GetByID(ctx, wsID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, protocol.ErrNotFound,
+				i18n.T(locale, i18n.MsgWorkstationNotFound, wsID.String()))
+			return
+		}
+		writeError(w, http.StatusInternalServerError, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgInternalError, err.Error()))
+		return
+	}
+	var body struct {
+		Patterns []string `json:"patterns"`
+	}
+	if !bindJSON(w, r, locale, &body) {
+		return
+	}
+	if len(body.Patterns) == 0 {
+		writeError(w, http.StatusBadRequest, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgRequired, "patterns"))
+		return
+	}
+	userID := store.UserIDFromContext(ctx)
+	perms := make([]store.WorkstationPermission, 0, len(body.Patterns))
+	for _, pattern := range body.Patterns {
+		if pattern == "" {
+			continue
+		}
+		perms = append(perms, store.WorkstationPermission{
+			WorkstationID: wsID,
+			Pattern:       pattern,
+			Enabled:       true,
+			CreatedBy:     userID,
+		})
+	}
+	count, err := h.permStore.AddBatch(ctx, perms)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToCreate, "permissions", err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{"count": count})
+}
+
+func (h *WorkstationsHandler) handlePermRemoveBulk(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	locale := store.LocaleFromContext(ctx)
+	if !requireTenantAdmin(w, r, h.tenantStore) || !h.requirePermStore(w, locale) {
+		return
+	}
+	var body struct {
+		IDs []string `json:"ids"`
+	}
+	if !bindJSON(w, r, locale, &body) {
+		return
+	}
+	if len(body.IDs) == 0 {
+		writeError(w, http.StatusBadRequest, protocol.ErrInvalidRequest,
+			i18n.T(locale, i18n.MsgRequired, "ids"))
+		return
+	}
+	ids := make([]uuid.UUID, 0, len(body.IDs))
+	for _, idStr := range body.IDs {
+		id, err := uuid.Parse(idStr)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, protocol.ErrInvalidRequest,
+				i18n.T(locale, i18n.MsgInvalidID, "permission"))
+			return
+		}
+		ids = append(ids, id)
+	}
+	count, err := h.permStore.RemoveBatch(ctx, ids)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, protocol.ErrInternal,
+			i18n.T(locale, i18n.MsgFailedToDelete, "permissions", err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"count": count})
 }
 
 func (h *WorkstationsHandler) handlePermToggle(w http.ResponseWriter, r *http.Request) {
