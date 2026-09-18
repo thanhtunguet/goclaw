@@ -17,20 +17,56 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
   const [pattern, setPattern] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   async function handleAdd() {
-    const value = pattern.trim();
-    if (!value || value === "*") {
+    const rawItems = pattern
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    const items = Array.from(new Set(rawItems));
+    if (items.length === 0 || items.some((item) => item === "*")) {
       setActionError(t("permissions.errors.invalidPattern"));
       return;
     }
     setSaving(true);
     setActionError(null);
     try {
-      await add(value);
+      for (const item of items) {
+        await add(item);
+      }
       setPattern("");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t("permissions.errors.addFailed"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleSelect(id: string, checked: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  function handleSelectAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(permissions.map((p) => p.id)) : new Set());
+  }
+
+  async function handleBulkRemove() {
+    if (selectedIds.size === 0) return;
+    setSaving(true);
+    setActionError(null);
+    try {
+      for (const id of selectedIds) {
+        await remove(id);
+      }
+      setSelectedIds(new Set());
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : t("permissions.errors.removeFailed"));
     } finally {
       setSaving(false);
     }
@@ -82,7 +118,7 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
           value={pattern}
           onChange={(event) => setPattern(event.target.value)}
           onKeyDown={(event) => { if (event.key === "Enter") void handleAdd(); }}
-          placeholder={t("permissions.patternPlaceholder")}
+          placeholder={t("permissions.patternPlaceholderMulti")}
           className="text-base md:text-sm"
           aria-label={t("permissions.patternLabel")}
           disabled={saving}
@@ -91,6 +127,17 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
           <Plus className="h-4 w-4" />
           {t("permissions.add")}
         </Button>
+        {selectedIds.size > 0 && (
+          <Button
+            variant="destructive"
+            className="gap-1"
+            onClick={() => void handleBulkRemove()}
+            disabled={saving}
+          >
+            <Trash2 className="h-4 w-4" />
+            {t("permissions.bulkRemove", { count: selectedIds.size })}
+          </Button>
+        )}
       </div>
 
       {(error || actionError) && <p className="text-sm text-destructive">{actionError ?? error}</p>}
@@ -104,6 +151,16 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
           <table className="min-w-[600px] w-full text-sm">
             <thead className="border-b bg-muted/50">
               <tr>
+                <th className="w-10 px-3 py-2">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer accent-primary"
+                    checked={permissions.length > 0 && selectedIds.size === permissions.length}
+                    onChange={(event) => handleSelectAll(event.target.checked)}
+                    aria-label={t("permissions.selectAll")}
+                    disabled={saving}
+                  />
+                </th>
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground">{t("permissions.columns.pattern")}</th>
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground">{t("permissions.columns.enabled")}</th>
                 <th className="px-3 py-2 text-right font-medium text-muted-foreground">{t("permissions.columns.actions")}</th>
@@ -111,7 +168,17 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
             </thead>
             <tbody className="divide-y">
               {permissions.map((permission) => (
-                <tr key={permission.id}>
+                <tr key={permission.id} className={selectedIds.has(permission.id) ? "bg-muted/30" : ""}>
+                  <td className="w-10 px-3 py-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 cursor-pointer accent-primary"
+                      checked={selectedIds.has(permission.id)}
+                      onChange={(event) => handleSelect(permission.id, event.target.checked)}
+                      aria-label={t("permissions.selectRow", { pattern: permission.pattern })}
+                      disabled={saving}
+                    />
+                  </td>
                   <td className="px-3 py-2 font-mono text-xs">{permission.pattern}</td>
                   <td className="px-3 py-2"><Switch checked={permission.enabled} onCheckedChange={(enabled) => void handleToggle(permission.id, enabled)} disabled={saving} /></td>
                   <td className="px-3 py-2 text-right"><Button variant="ghost" size="sm" className="h-8 text-destructive hover:text-destructive" onClick={() => void handleRemove(permission.id)} disabled={saving}><Trash2 className="h-4 w-4" /><span className="sr-only">{t("permissions.remove")}</span></Button></td>

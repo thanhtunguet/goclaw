@@ -122,7 +122,11 @@
     "description": "按确切名称或前缀通配符允许可执行文件（例如 git 或 python*）。Shell 和单独的 * 始终不允许。",
     "patternLabel": "可执行文件名称或前缀通配符",
     "patternPlaceholder": "例如 npm 或 python*",
+    "patternPlaceholderMulti": "例如 npm, python*, git（用逗号分隔）",
     "add": "允许命令",
+    "bulkRemove": "删除 ({{count}})",
+    "selectAll": "选择所有命令",
+    "selectRow": "选择 {{pattern}}",
     "remove": "删除权限",
     "empty": "尚未允许任何命令。关联的 Agent 在添加权限前无法执行命令。",
     "columns": {

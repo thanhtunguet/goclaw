@@ -122,7 +122,11 @@
     "description": "Allow executables by exact name or prefix wildcard (for example, git or python*). Shells and a lone * are never allowed.",
     "patternLabel": "Executable name or prefix wildcard",
     "patternPlaceholder": "e.g. npm or python*",
+    "patternPlaceholderMulti": "e.g. npm, python*, git (comma-separated)",
     "add": "Allow command",
+    "bulkRemove": "Delete ({{count}})",
+    "selectAll": "Select all commands",
+    "selectRow": "Select {{pattern}}",
     "remove": "Remove permission",
     "empty": "No commands are allowed. Linked agents cannot execute commands until you add one.",
     "columns": {

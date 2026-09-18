@@ -122,7 +122,11 @@
     "description": "Cho phép tệp thực thi theo tên chính xác hoặc tiền tố có ký tự đại diện (ví dụ git hoặc python*). Shell và * đứng riêng luôn bị chặn.",
     "patternLabel": "Tên tệp thực thi hoặc tiền tố có ký tự đại diện",
     "patternPlaceholder": "ví dụ npm hoặc python*",
+    "patternPlaceholderMulti": "ví dụ npm, python*, git (phân cách bởi dấu phẩy)",
     "add": "Cho phép lệnh",
+    "bulkRemove": "Xóa ({{count}})",
+    "selectAll": "Chọn tất cả lệnh",
+    "selectRow": "Chọn {{pattern}}",
     "remove": "Xóa quyền",
     "empty": "Chưa có lệnh nào được cho phép. Agent đã liên kết không thể chạy lệnh cho đến khi bạn thêm quyền.",
     "columns": {
