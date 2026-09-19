@@ -134,6 +134,10 @@
       "enabled": "已启用",
       "actions": "操作"
     },
+    "confirmDeleteTitle": "移除命令权限？",
+    "confirmDeleteDescription": "将移除该命令模式。关联的代理将无法再执行此命令。",
+    "confirmBulkDeleteTitle": "移除 {{count}} 个命令权限？",
+    "confirmBulkDeleteDescription": "将移除 {{count}} 个命令模式。关联的代理将无法再执行这些命令。",
     "errors": {
       "invalidPattern": "请输入可执行文件名称或前缀通配符；不允许单独使用 *。",
       "addFailed": "添加命令权限失败。",

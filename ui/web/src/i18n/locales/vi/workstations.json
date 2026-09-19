@@ -134,6 +134,10 @@
       "enabled": "Bật",
       "actions": "Thao tác"
     },
+    "confirmDeleteTitle": "Xóa quyền lệnh?",
+    "confirmDeleteDescription": "Quyền lệnh sẽ bị xóa. Các agent liên kết sẽ không thể thực thi lệnh này nữa.",
+    "confirmBulkDeleteTitle": "Xóa {{count}} quyền lệnh?",
+    "confirmBulkDeleteDescription": "{{count}} quyền lệnh sẽ bị xóa. Các agent liên kết sẽ không thể thực thi các lệnh này nữa.",
     "errors": {
       "invalidPattern": "Nhập tên tệp thực thi hoặc tiền tố có ký tự đại diện; không cho phép * đứng riêng.",
       "addFailed": "Không thể thêm quyền lệnh.",

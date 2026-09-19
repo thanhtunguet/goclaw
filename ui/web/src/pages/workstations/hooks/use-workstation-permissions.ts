@@ -50,10 +50,20 @@ export function useWorkstationPermissions(workstationId: string) {
     await load();
   }, [load, ws]);
 
+  const addBulk = useCallback(async (patterns: string[]) => {
+    await ws.call(Methods.WORKSTATIONS_PERMS_ADD_BULK, { workstationId, patterns });
+    await load();
+  }, [load, workstationId, ws]);
+
+  const removeBulk = useCallback(async (ids: string[]) => {
+    await ws.call(Methods.WORKSTATIONS_PERMS_REMOVE_BULK, { ids });
+    await load();
+  }, [load, ws]);
+
   const setEnabled = useCallback(async (id: string, enabled: boolean) => {
     await ws.call(Methods.WORKSTATIONS_PERMS_TOGGLE, { id, enabled });
     await load();
   }, [load, ws]);
 
-  return { permissions, loading, error, refresh: load, add, remove, setEnabled };
+  return { permissions, loading, error, refresh: load, add, addBulk, remove, removeBulk, setEnabled };
 }

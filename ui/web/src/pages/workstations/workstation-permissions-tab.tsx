@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useWorkstationPermissions } from "./hooks/use-workstation-permissions";
 
 interface WorkstationPermissionsTabProps {
@@ -13,11 +14,13 @@ interface WorkstationPermissionsTabProps {
 
 export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissionsTabProps) {
   const { t } = useTranslation("workstations");
-  const { permissions, loading, error, refresh, add, remove, setEnabled } = useWorkstationPermissions(workstationId);
+  const { permissions, loading, error, refresh, add, addBulk, remove, removeBulk, setEnabled } = useWorkstationPermissions(workstationId);
   const [pattern, setPattern] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id?: string }>({ open: false });
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   async function handleAdd() {
     const rawItems = pattern
@@ -32,8 +35,10 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
     setSaving(true);
     setActionError(null);
     try {
-      for (const item of items) {
-        await add(item);
+      if (items.length === 1) {
+        await add(items[0]!);
+      } else {
+        await addBulk(items);
       }
       setPattern("");
     } catch (err) {
@@ -56,15 +61,19 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
     setSelectedIds(checked ? new Set(permissions.map((p) => p.id)) : new Set());
   }
 
+  function openBulkDeleteConfirm() {
+    if (selectedIds.size === 0) return;
+    setBulkDeleteConfirm(true);
+  }
+
   async function handleBulkRemove() {
     if (selectedIds.size === 0) return;
     setSaving(true);
     setActionError(null);
     try {
-      for (const id of selectedIds) {
-        await remove(id);
-      }
+      await removeBulk(Array.from(selectedIds));
       setSelectedIds(new Set());
+      setBulkDeleteConfirm(false);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t("permissions.errors.removeFailed"));
     } finally {
@@ -84,11 +93,16 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
     }
   }
 
+  function openDeleteConfirm(id: string) {
+    setDeleteConfirm({ open: true, id });
+  }
+
   async function handleRemove(id: string) {
     setSaving(true);
     setActionError(null);
     try {
       await remove(id);
+      setDeleteConfirm({ open: false });
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t("permissions.errors.removeFailed"));
     } finally {
@@ -131,7 +145,7 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
           <Button
             variant="destructive"
             className="gap-1"
-            onClick={() => void handleBulkRemove()}
+            onClick={() => openBulkDeleteConfirm()}
             disabled={saving}
           >
             <Trash2 className="h-4 w-4" />
@@ -181,13 +195,31 @@ export function WorkstationPermissionsTab({ workstationId }: WorkstationPermissi
                   </td>
                   <td className="px-3 py-2 font-mono text-xs">{permission.pattern}</td>
                   <td className="px-3 py-2"><Switch checked={permission.enabled} onCheckedChange={(enabled) => void handleToggle(permission.id, enabled)} disabled={saving} /></td>
-                  <td className="px-3 py-2 text-right"><Button variant="ghost" size="sm" className="h-8 text-destructive hover:text-destructive" onClick={() => void handleRemove(permission.id)} disabled={saving}><Trash2 className="h-4 w-4" /><span className="sr-only">{t("permissions.remove")}</span></Button></td>
+                  <td className="px-3 py-2 text-right"><Button variant="ghost" size="sm" className="h-8 text-destructive hover:text-destructive" onClick={() => openDeleteConfirm(permission.id)} disabled={saving}><Trash2 className="h-4 w-4" /><span className="sr-only">{t("permissions.remove")}</span></Button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => setDeleteConfirm({ open, id: deleteConfirm.id })}
+        title={t("permissions.confirmDeleteTitle")}
+        description={t("permissions.confirmDeleteDescription")}
+        onConfirm={() => deleteConfirm.id && void handleRemove(deleteConfirm.id)}
+        loading={saving}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onOpenChange={setBulkDeleteConfirm}
+        title={t("permissions.confirmBulkDeleteTitle", { count: selectedIds.size })}
+        description={t("permissions.confirmBulkDeleteDescription", { count: selectedIds.size })}
+        onConfirm={() => void handleBulkRemove()}
+        loading={saving}
+      />
     </div>
   );
 }

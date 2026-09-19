@@ -202,7 +202,9 @@ export const Methods = {
   // Phase 6: permissions
   WORKSTATIONS_PERMS_LIST: "workstations.permissions.list",
   WORKSTATIONS_PERMS_ADD: "workstations.permissions.add",
+  WORKSTATIONS_PERMS_ADD_BULK: "workstations.permissions.addBulk",
   WORKSTATIONS_PERMS_REMOVE: "workstations.permissions.remove",
+  WORKSTATIONS_PERMS_REMOVE_BULK: "workstations.permissions.removeBulk",
   WORKSTATIONS_PERMS_TOGGLE: "workstations.permissions.toggle",
   // Phase 7: activity audit log
   WORKSTATIONS_LIST_ACTIVITY: "workstations.activity.list",

@@ -134,6 +134,10 @@
       "enabled": "Enabled",
       "actions": "Actions"
     },
+    "confirmDeleteTitle": "Remove command permission?",
+    "confirmDeleteDescription": "This will remove the allowed command pattern. Linked agents will no longer be able to execute this command.",
+    "confirmBulkDeleteTitle": "Remove {{count}} command permission?",
+    "confirmBulkDeleteDescription": "This will remove {{count}} allowed command patterns. Linked agents will no longer be able to execute these commands.",
     "errors": {
       "invalidPattern": "Enter an executable name or a prefix wildcard; * by itself is not allowed.",
       "addFailed": "Failed to add command permission.",
