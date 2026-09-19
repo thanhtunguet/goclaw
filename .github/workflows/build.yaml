@@ -35,11 +35,15 @@ jobs:
         id: version
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            VERSION="${GITHUB_REF_NAME}"
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "package_name=goclaw-${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           else
-            VERSION="${GITHUB_SHA::8}"
+            # Fork develop build: a single rolling "latest build". No SHA in the
+            # published file names so they stay human readable and are simply
+            # replaced on every run instead of accumulating history.
+            echo "version=develop-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+            echo "package_name=goclaw" >> "$GITHUB_OUTPUT"
           fi
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build binary
         env:
@@ -50,11 +54,11 @@ jobs:
           CGO_ENABLED=0 go build \
             -ldflags="-s -w -X github.com/nextlevelbuilder/goclaw/cmd.Version=${VERSION}" \
             -o goclaw .
-          PACKAGE_DIR="goclaw-${VERSION}-linux-${{ matrix.goarch }}"
-          mkdir -p "$PACKAGE_DIR"
-          cp goclaw "$PACKAGE_DIR/"
-          cp -R migrations "$PACKAGE_DIR/"
-          (cd "$PACKAGE_DIR" && zip -r "../${PACKAGE_DIR}.zip" .)
+          PACKAGE_NAME="${{ steps.version.outputs.package_name }}-linux-${{ matrix.goarch }}"
+          mkdir -p "$PACKAGE_NAME"
+          cp goclaw "$PACKAGE_NAME/"
+          cp -R migrations "$PACKAGE_NAME/"
+          (cd "$PACKAGE_NAME" && zip -r "../${PACKAGE_NAME}.zip" .)
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -82,6 +86,9 @@ jobs:
           tag: develop
           name: develop
           allowUpdates: true
+          # Rolling "latest build" only: drop every existing asset (including the
+          # legacy SHA-named zips) before uploading this run's files.
+          removeArtifacts: true
           replacesArtifacts: true
           prerelease: true
           artifacts: "dist/*.zip"
