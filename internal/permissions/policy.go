@@ -323,7 +323,9 @@ func isAdminMethod(method string) bool {
 		protocol.MethodWorkstationsLinkAgent,
 		protocol.MethodWorkstationsUnlinkAgent,
 		protocol.MethodWorkstationsPermAdd,
+		protocol.MethodWorkstationsPermAddBulk,
 		protocol.MethodWorkstationsPermRemove,
+		protocol.MethodWorkstationsPermRemoveBulk,
 		protocol.MethodWorkstationsPermToggle,
 	}
 	return slices.Contains(adminMethods, method)

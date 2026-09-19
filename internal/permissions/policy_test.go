@@ -102,6 +102,8 @@ func TestCanAccess_AdminMethods(t *testing.T) {
 		protocol.MethodAgentsDelete,
 		protocol.MethodAPIKeysCreate,
 		protocol.MethodTeamsCreate,
+		protocol.MethodWorkstationsPermAddBulk,
+		protocol.MethodWorkstationsPermRemoveBulk,
 	}
 	for _, method := range adminMethods {
 		t.Run(method, func(t *testing.T) {
