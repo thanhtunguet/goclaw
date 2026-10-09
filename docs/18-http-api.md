@@ -2,7 +2,7 @@
 
 GoClaw exposes a comprehensive HTTP REST API alongside the WebSocket RPC protocol. All endpoints are served from the same gateway server and share authentication, rate limiting, and i18n infrastructure.
 
-Interactive documentation is available at `/docs` (Swagger UI) and the raw OpenAPI 3.0 spec at `/v1/openapi.json`.
+Interactive documentation is available at `/docs` or `/v1/docs` (Swagger UI) and the raw OpenAPI 3.0 spec at `/v1/openapi.json` (also mirrored at `/v1/docs/openapi.json`).
 
 ---
 

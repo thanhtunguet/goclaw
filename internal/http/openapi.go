@@ -19,8 +19,11 @@ func NewDocsHandler() *DocsHandler {
 // RegisterRoutes registers documentation routes on the given mux.
 func (h *DocsHandler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /v1/openapi.json", h.handleSpec)
+  mux.HandleFunc("GET /v1/docs/openapi.json", h.handleSpec)
 	mux.HandleFunc("GET /docs", h.handleSwaggerUI)
 	mux.HandleFunc("GET /docs/", h.handleSwaggerUI)
+  mux.HandleFunc("GET /v1/docs", h.handleSwaggerUI)
+  mux.HandleFunc("GET /v1/docs/", h.handleSwaggerUI)
 }
 
 func (h *DocsHandler) handleSpec(w http.ResponseWriter, _ *http.Request) {

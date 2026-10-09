@@ -522,13 +522,14 @@ All CRUD endpoints require `Authorization: Bearer <token>` and `X-GoClaw-User-Id
 | GET | `/v1/usage` | Get usage metrics |
 | GET | `/v1/usage/summary` | Get aggregated usage summary |
 
-**OAuth & Docs** (`/oauth`, `/docs`):
+**OAuth & Docs** (`/oauth`, `/docs`, `/v1/docs`):
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET,POST | `/oauth/*` | OAuth authentication endpoints |
-| GET | `/docs/openapi.json` | OpenAPI specification |
-| GET | `/docs/swagger-ui/` | Swagger UI |
+| GET | `/v1/openapi.json` | OpenAPI specification |
+| GET | `/v1/docs/openapi.json` | OpenAPI specification (production-friendly alias) |
+| GET | `/docs`, `/v1/docs` | Swagger UI |
 
 **MCP Bridge** (`/mcp/bridge`):
 
